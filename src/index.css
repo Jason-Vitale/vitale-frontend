@@ -184,13 +184,13 @@ nav {
 /* BLOTTER WIDGET */
 .blotter-widget {
   position: absolute;
-  right: 0;
-  top: 64px;
-  bottom: 0;
-  width: 46%;
+  right: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52%;
+  height: 340px;
   background: rgba(13,18,33,0.97);
-  border: none;
-  border-left: 1px solid var(--border);
+  border: 1px solid var(--border);
   border-top: 3px solid var(--cyan);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -750,7 +750,7 @@ footer p {
 }
 
 /* ── HERO MATRIX ────────────────────────────────────────────────── */
-.hero-content { max-width: 50%; }
+.hero-content { max-width: 44%; }
 .hero-matrix-rows {
   flex: 1;
   display: flex;
