@@ -1,68 +1,100 @@
 import { useState, useEffect, useRef } from 'react';
 
-const TERMINAL_LINES = [
-  { type: 'header',  text: '$ fcc-ingest --file SAT-LOA-20240318-00042.pdf --mode parse' },
-  { type: 'header',  text: 'Vitale Aerospace FCC Document Parser v2.4.1' },
-  { type: 'divider', text: '─────────────────────────────────────────────' },
-  { type: 'info',    text: 'Ingesting: SAT-LOA-20240318-00042.pdf' },
-  { type: 'info',    text: 'Form type: ICFS Schedule S (NGSO-SAT-MOD-20240318)' },
-  { type: 'info',    text: 'Applicant: Kepler Communications Inc.' },
-  { type: 'divider', text: '─────────────────────────────────────────────' },
-  { type: 'info',    text: 'Extracting orbital parameters...' },
-  { type: 'ok',      text: '[OK]  Altitude band:         510–540 km (LEO)' },
-  { type: 'ok',      text: '[OK]  Inclination:           97.4° ± 0.2° SSO' },
-  { type: 'ok',      text: '[OK]  RAAN:                  15.7° at epoch' },
-  { type: 'ok',      text: '[OK]  Eccentricity:          < 0.001 (near-circular)' },
-  { type: 'ok',      text: '[OK]  Argument of perigee:   not constrained' },
-  { type: 'ok',      text: '[OK]  Collision probability: Pc < 1×10⁻⁴ (47 CFR §25.283)' },
-  { type: 'divider', text: '─────────────────────────────────────────────' },
-  { type: 'info',    text: 'Parsing deorbit / disposal plan...' },
-  { type: 'ok',      text: '[OK]  Post-mission disposal: ≤ 5 years (ITU §22.2)' },
-  { type: 'ok',      text: '[OK]  PMD probability:       0.97 (ODAR §4.2 compliant)' },
-  { type: 'ok',      text: '[OK]  ODAR ODM delta-V:      3.2 m/s reserve confirmed' },
-  { type: 'ok',      text: '[OK]  STA waiver:            not required' },
-  { type: 'divider', text: '─────────────────────────────────────────────' },
-  { type: 'info',    text: 'Cross-referencing live TLE (NORAD catalog)...' },
-  { type: 'ok',      text: '[OK]  NORAD ID 58341 matched' },
-  { type: 'ok',      text: '[OK]  Current altitude:      526.1 km  (within band)' },
-  { type: 'ok',      text: '[OK]  Current inclination:   97.41°    (within tolerance)' },
-  { type: 'warn',    text: '[ΔΔ]  RAAN drift:            +0.38° vs filed epoch' },
-  { type: 'divider', text: '─────────────────────────────────────────────' },
-  { type: 'info',    text: 'Computing conformance score...' },
-  { type: 'ok',      text: '[OK]  FCC Filing Conformance: 94.2 / 100' },
-  { type: 'ok',      text: '[OK]  ITU Coordination:       matched (NGSO arc §9.7A)' },
-  { type: 'ok',      text: '' },
-  { type: 'success', text: '✓  ADDED TO COMPLIANCE BLOTTER  [VA-BLT-58341]' },
+const FILES = [
+  {
+    name: 'SAT-LOA-20240318-00042.pdf',
+    form: 'ICFS Schedule S',
+    filing: 'NGSO-SAT-MOD-20240318',
+    applicant: 'Vitale-Meridian LLC',
+  },
+  {
+    name: 'ODAR-VA-SSO017-2024.pdf',
+    form: 'ODAR Disposal Report',
+    filing: 'NGSO-SAT-MOD-20231105',
+    applicant: 'Vitale-Solaris Inc.',
+  },
+  {
+    name: 'STA-Waiver-VA-LEO031.pdf',
+    form: 'STA Waiver Application',
+    filing: 'SAT-STA-20240601-00031',
+    applicant: 'Vitale-Arclight Corp.',
+  },
 ];
 
+const FIELDS = [
+  { label: 'Form Type',           key: 'form_type',   status: 'ok'   },
+  { label: 'Applicant',           key: 'applicant',   status: 'ok'   },
+  { label: 'Altitude Band',       key: 'altitude',    status: 'ok'   },
+  { label: 'Inclination',         key: 'inclination', status: 'ok'   },
+  { label: 'RAAN at Epoch',       key: 'raan',        status: 'ok'   },
+  { label: 'Eccentricity',        key: 'eccentricity',status: 'ok'   },
+  { label: 'Collision Prob. (Pc)','key': 'pc',        status: 'ok'   },
+  { label: 'PMD Probability',     key: 'pmd',         status: 'ok'   },
+  { label: 'Post-Mission Disposal',key:'pmd_years',   status: 'ok'   },
+  { label: 'ODAR ODM delta-V',    key: 'deltav',      status: 'ok'   },
+  { label: 'RAAN Drift vs Filed', key: 'raan_drift',  status: 'warn' },
+  { label: 'ITU Coordination',    key: 'itu',         status: 'ok'   },
+  { label: 'FCC Conformance Score',key:'score',       status: 'ok'   },
+];
+
+const VALUES = [
+  ['ICFS Schedule S',    'Vitale-Meridian LLC',  '510–540 km (LEO)', '97.4° ± 0.2° SSO', '15.7° at epoch',    '< 0.001',  '< 1×10⁻⁴ (47 CFR §25.283)', '0.97 ODAR §4.2', '≤ 5 yrs ITU §22.2', '3.2 m/s reserve', '+0.38° vs epoch', 'NGSO arc §9.7A', '94.2 / 100'],
+  ['ODAR Disposal Rpt',  'Vitale-Solaris Inc.',  '505–530 km (LEO)', '98.1° ± 0.1° SSO', '22.3° at epoch',    '< 0.0008', '< 1×10⁻⁴ (47 CFR §25.283)', '0.98 ODAR §4.2', '≤ 5 yrs ITU §22.2', '2.9 m/s reserve', '+0.21° vs epoch', 'NGSO arc §9.7A', '97.1 / 100'],
+  ['STA Waiver',         'Vitale-Arclight Corp.','530–550 km (LEO)', '53.0° ± 0.3°',     '340.1° at epoch',   '< 0.002',  '< 1×10⁻⁴ (47 CFR §25.283)', '0.96 ODAR §4.2', '≤ 5 yrs ITU §22.2', '4.1 m/s reserve', '+0.11° vs epoch', 'NGSO arc §9.7A', '91.8 / 100'],
+];
+
+// Phases: 'drop' | 'uploading' | 'parsing' | 'complete'
 export default function FCCIngest() {
-  const [visibleCount, setVisibleCount] = useState(0);
+  const [fileIndex,    setFileIndex]    = useState(0);
+  const [phase,        setPhase]        = useState('drop');
+  const [uploadPct,    setUploadPct]    = useState(0);
+  const [visibleFields,setVisibleFields]= useState(0);
+  const [showResult,   setShowResult]   = useState(false);
   const timers = useRef([]);
+  const file   = FILES[fileIndex];
+  const values = VALUES[fileIndex];
 
   useEffect(() => {
-    let i = 0;
-    const schedule = () => {
-      if (i >= TERMINAL_LINES.length) {
-        // Pause then restart
+    const runCycle = (idx) => {
+      setFileIndex(idx);
+      setPhase('drop');
+      setUploadPct(0);
+      setVisibleFields(0);
+      setShowResult(false);
+
+      // After short "idle" show file being dropped
+      const t0 = setTimeout(() => {
+        setPhase('uploading');
+        let p = 0;
+        const tick = setInterval(() => {
+          p = Math.min(p + 9, 100);
+          setUploadPct(p);
+          if (p >= 100) clearInterval(tick);
+        }, 70);
+      }, 900);
+
+      // Move to parsing
+      const t1 = setTimeout(() => {
+        setPhase('parsing');
+        setVisibleFields(0);
+      }, 900 + 100 * 12 + 300); // ~2s total for upload
+
+      // Reveal fields one by one
+      FIELDS.forEach((_, i) => {
         const t = setTimeout(() => {
-          setVisibleCount(0);
-          i = 0;
-          schedule();
-        }, 3200);
+          setVisibleFields(i + 1);
+        }, 900 + 1400 + i * 200);
         timers.current.push(t);
-        return;
-      }
-      const delay = TERMINAL_LINES[i].type === 'divider' ? 80
-        : TERMINAL_LINES[i].type === 'header' ? 60
-        : 110 + Math.random() * 80;
-      const t = setTimeout(() => {
-        i++;
-        setVisibleCount(i);
-        schedule();
-      }, delay);
-      timers.current.push(t);
+      });
+
+      const doneAt = 900 + 1400 + FIELDS.length * 200 + 300;
+      const t2 = setTimeout(() => { setPhase('complete'); setShowResult(true); }, doneAt);
+      const t3 = setTimeout(() => runCycle((idx + 1) % FILES.length), doneAt + 4000);
+
+      timers.current.push(t0, t1, t2, t3);
     };
-    schedule();
+
+    runCycle(0);
     return () => timers.current.forEach(clearTimeout);
   }, []);
 
@@ -110,26 +142,99 @@ export default function FCCIngest() {
           </ul>
         </div>
 
-        {/* Right: terminal */}
-        <div className="fcc-terminal-wrap">
-          <div className="fcc-terminal">
-            <div className="fcc-terminal-bar">
-              <span className="term-dot" style={{ background: '#EF4444' }} />
-              <span className="term-dot" style={{ background: '#F59E0B' }} />
-              <span className="term-dot" style={{ background: '#10B981' }} />
-              <span className="term-title">FCC DOCUMENT PARSER</span>
+        {/* Right: Platform UI */}
+        <div className="fcc-platform-wrap">
+          {/* Chrome bar */}
+          <div className="platform-chrome">
+            <div className="platform-chrome-dots">
+              <span style={{ background: '#EF4444' }} />
+              <span style={{ background: '#F59E0B' }} />
+              <span style={{ background: '#10B981' }} />
             </div>
-            <div className="fcc-terminal-body">
-              {TERMINAL_LINES.slice(0, visibleCount).map((line, i) => (
-                <div
-                  key={i}
-                  className={`fcc-line fcc-line--${line.type}`}
-                >
-                  {line.text}
-                  {i === visibleCount - 1 && <span className="cursor" />}
+            <div className="platform-chrome-title">VITALE AEROSPACE · FCC DOCUMENT PARSER</div>
+            <div className="platform-chrome-actions">
+              <span className="platform-chrome-pill">Blotter</span>
+              <span className="platform-chrome-pill platform-chrome-pill--active">Ingest</span>
+            </div>
+          </div>
+
+          <div className="fcc-platform-body">
+            {/* Upload / drop zone */}
+            <div className={`fcc-dropzone${phase === 'drop' ? ' fcc-dropzone--idle' : phase === 'uploading' ? ' fcc-dropzone--uploading' : ' fcc-dropzone--done'}`}>
+              {phase === 'drop' && (
+                <>
+                  <div className="fcc-drop-icon">
+                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M12 15V3m0 0L8 7m4-4 4 4"/>
+                      <path d="M2 17l.621 2.485A2 2 0 0 0 4.561 21h14.878a2 2 0 0 0 1.94-1.515L22 17"/>
+                    </svg>
+                  </div>
+                  <div className="fcc-drop-label">Drop FCC filing here</div>
+                  <div className="fcc-drop-sub">ICFS Schedule S · ODAR · STA Waiver · PDF</div>
+                </>
+              )}
+              {phase === 'uploading' && (
+                <>
+                  <div className="fcc-upload-file">
+                    <div className="fcc-upload-icon">
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </div>
+                    <div>
+                      <div className="fcc-upload-name">{file.name}</div>
+                      <div className="fcc-upload-sub">Uploading…  {uploadPct}%</div>
+                    </div>
+                  </div>
+                  <div className="fcc-upload-track">
+                    <div className="fcc-upload-fill" style={{ width: `${uploadPct}%` }} />
+                  </div>
+                </>
+              )}
+              {(phase === 'parsing' || phase === 'complete') && (
+                <div className="fcc-upload-file">
+                  <div className="fcc-upload-icon fcc-upload-icon--done">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                      <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="fcc-upload-name">{file.name}</div>
+                    <div className="fcc-upload-sub fcc-upload-sub--done">{file.form} · {file.filing}</div>
+                  </div>
                 </div>
-              ))}
+              )}
             </div>
+
+            {/* Extracted fields table */}
+            {(phase === 'parsing' || phase === 'complete') && (
+              <div className="fcc-fields">
+                <div className="fcc-fields-head">
+                  <span>Parameter</span>
+                  <span>Extracted Value</span>
+                  <span>Status</span>
+                </div>
+                {FIELDS.slice(0, visibleFields).map((field, i) => (
+                  <div key={i} className="fcc-field-row fcc-field-row--in">
+                    <span className="fcc-field-label">{field.label}</span>
+                    <span className="fcc-field-value">{values[i]}</span>
+                    <span className={`audit-badge audit-badge--${field.status}`}>
+                      {field.status === 'warn' ? 'FLAGGED' : 'OK'}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Completion banner */}
+            {showResult && (
+              <div className="fcc-complete-banner">
+                <span className="fcc-complete-dot" />
+                <span>Added to compliance blotter  ·  Conformance score: <strong>{values[12]}</strong></span>
+                <span className="fcc-complete-id">VA-BLT-{file.filing.slice(-5)}</span>
+              </div>
+            )}
           </div>
         </div>
       </div>
