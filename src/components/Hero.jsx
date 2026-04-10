@@ -3,12 +3,22 @@ import { useState, useEffect, useRef } from 'react';
 const COLS = ['ALT', 'INC', 'RAAN', 'COL', 'FCC', 'DEORBIT'];
 
 const SATS = [
-  { id: 'PL-0042',  name: 'Planet Labs'    },
-  { id: 'SPR-118',  name: 'Spire Global'   },
-  { id: 'AST-007',  name: 'AST SpaceMobile'},
-  { id: 'HE3-031',  name: 'HawkEye 360'   },
-  { id: 'ICE-009',  name: 'ICEYE'          },
-  { id: 'KPR-044',  name: 'Kepler Comms'  },
+  { id: 'PL-0042',  name: 'Planet Labs'     },
+  { id: 'SPR-118',  name: 'Spire Global'    },
+  { id: 'AST-007',  name: 'AST SpaceMobile' },
+  { id: 'HE3-031',  name: 'HawkEye 360'    },
+  { id: 'ICE-009',  name: 'ICEYE'           },
+  { id: 'KPR-044',  name: 'Kepler Comms'   },
+  { id: 'STK-022',  name: 'Starlink G6'    },
+  { id: 'OW-117',   name: 'OneWeb'         },
+  { id: 'GHO-003',  name: 'Ghost Satellite' },
+  { id: 'LND-055',  name: 'LeoLabs-5'      },
+  { id: 'TRG-011',  name: 'Turion Space'   },
+  { id: 'XOM-088',  name: 'ExoAnalytic'    },
+  { id: 'CPS-019',  name: 'Capella Space'  },
+  { id: 'SYN-073',  name: 'Synspective'    },
+  { id: 'ORB-006',  name: 'Orbital Insight' },
+  { id: 'VEN-034',  name: 'Venta Systems'  },
 ];
 
 const CELL_STYLES = {
@@ -76,27 +86,29 @@ function HeroMatrix() {
       </div>
 
       {/* data rows */}
-      {SATS.map((sat, r) => (
-        <div className="hero-matrix-row" key={sat.id} style={{ gridTemplateColumns: GRID_TPL }}>
-          <div className="hero-matrix-sat">
-            <span className="sat-id" style={{ fontSize: '10px' }}>{sat.id}</span>
-            <span className="sat-name" style={{ fontSize: '9px', color: 'var(--text-dim)' }}>{sat.name}</span>
+      <div className="hero-matrix-rows">
+        {SATS.map((sat, r) => (
+          <div className="hero-matrix-row" key={sat.id} style={{ gridTemplateColumns: GRID_TPL }}>
+            <div className="hero-matrix-sat">
+              <span className="sat-id" style={{ fontSize: '10px' }}>{sat.id}</span>
+              <span className="sat-name" style={{ fontSize: '9px', color: 'var(--text-dim)' }}>{sat.name}</span>
+            </div>
+            {COLS.map((col, c) => {
+              const s = grid[r][c];
+              const { bg, border, dot } = CELL_STYLES[s];
+              return (
+                <div
+                  key={col}
+                  className="hero-matrix-cell"
+                  style={{ background: bg, borderColor: border }}
+                >
+                  <span className="matrix-cell-dot" style={{ background: dot }} />
+                </div>
+              );
+            })}
           </div>
-          {COLS.map((col, c) => {
-            const s = grid[r][c];
-            const { bg, border, dot } = CELL_STYLES[s];
-            return (
-              <div
-                key={col}
-                className="hero-matrix-cell"
-                style={{ background: bg, borderColor: border }}
-              >
-                <span className="matrix-cell-dot" style={{ background: dot }} />
-              </div>
-            );
-          })}
-        </div>
-      ))}
+        ))}
+      </div>
 
       <div className="blotter-footer">
         <span>10,427 objects tracked</span>
@@ -112,24 +124,28 @@ export default function Hero() {
 
   return (
     <section className="hero">
-      <div className="hero-label">Satellite Compliance Platform</div>
-      <h1>
-        Every satellite.<br />
-        <em>Every limit.</em><br />
-        In real time.
-      </h1>
-      <p>
-        Vitale Aerospace monitors all FCC-licensed LEO objects against their
-        filed orbital parameters — flagging deviations the moment they occur,
-        before they become violations.
-      </p>
-      <div className="hero-actions">
-        <button className="btn-primary" onClick={() => scrollTo('demo')}>
-          Request a Demo
-        </button>
-        <button className="btn-ghost" onClick={() => scrollTo('platform')}>
-          See the Platform
-        </button>
+      <div className="hero-content">
+        <div className="hero-label">Satellite Compliance Platform</div>
+        <h1>
+          Every satellite.<br />
+          <em>Every limit.</em><br />
+          In real time.
+        </h1>
+        <p>
+          Vitale Aerospace is the compliance layer for LEO operations — continuously
+          monitoring every FCC-licensed object against its filed orbital parameters,
+          AI-parsing submitted FCC documents to detect deviations the moment they occur,
+          auto-generating audit trails, and verifying deorbit plans match the filings
+          operators submitted. Violations flagged before they happen.
+        </p>
+        <div className="hero-actions">
+          <button className="btn-primary" onClick={() => scrollTo('demo')}>
+            Request a Demo
+          </button>
+          <button className="btn-ghost" onClick={() => scrollTo('platform')}>
+            See the Platform
+          </button>
+        </div>
       </div>
 
       <HeroMatrix />
