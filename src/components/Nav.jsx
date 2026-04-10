@@ -4,9 +4,7 @@ export default function Nav() {
 
   return (
     <nav>
-      <div className="nav-logo">
-        VITALE<span>.</span>AEROSPACE
-      </div>
+      <div className="nav-logo">VITALE AEROSPACE</div>
       <ul className="nav-links">
         <li><a href="#platform">Platform</a></li>
         <li><a href="#enterprise">Enterprise</a></li>
