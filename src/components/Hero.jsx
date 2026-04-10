@@ -11,14 +11,8 @@ const SATS = [
   { id: 'KPR-044',  name: 'Kepler Comms'   },
   { id: 'STK-022',  name: 'Starlink G6'    },
   { id: 'OW-117',   name: 'OneWeb'         },
-  { id: 'GHO-003',  name: 'Ghost Satellite' },
-  { id: 'LND-055',  name: 'LeoLabs-5'      },
-  { id: 'TRG-011',  name: 'Turion Space'   },
-  { id: 'XOM-088',  name: 'ExoAnalytic'    },
   { id: 'CPS-019',  name: 'Capella Space'  },
   { id: 'SYN-073',  name: 'Synspective'    },
-  { id: 'ORB-006',  name: 'Orbital Insight' },
-  { id: 'VEN-034',  name: 'Venta Systems'  },
 ];
 
 const CELL_STYLES = {
