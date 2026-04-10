@@ -188,7 +188,7 @@ nav {
   top: 50%;
   transform: translateY(-50%);
   width: 52%;
-  height: 340px;
+  height: 420px;
   background: rgba(13,18,33,0.97);
   border: 1px solid var(--border);
   border-top: 3px solid var(--cyan);
