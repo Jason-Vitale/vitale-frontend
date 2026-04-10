@@ -184,13 +184,13 @@ nav {
 /* BLOTTER WIDGET */
 .blotter-widget {
   position: absolute;
-  right: 0;
-  top: 0;
-  bottom: 0;
-  width: 46%;
+  right: 48px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 52%;
+  height: 420px;
   background: rgba(13,18,33,0.97);
-  border: none;
-  border-left: 1px solid var(--border);
+  border: 1px solid var(--border);
   border-top: 3px solid var(--cyan);
   font-family: var(--font-mono);
   font-size: 11px;
@@ -750,7 +750,7 @@ footer p {
 }
 
 /* ── HERO MATRIX ────────────────────────────────────────────────── */
-.hero-content { max-width: 50%; }
+.hero-content { max-width: 44%; }
 .hero-matrix-rows {
   flex: 1;
   display: flex;
@@ -1317,21 +1317,43 @@ footer p {
 
 @media (max-width: 1024px) {
   .blotter-widget { display: none; }
+  .hero-content { max-width: 60%; }
   .pillars { grid-template-columns: 1fr; }
   .enterprise-grid { grid-template-columns: 1fr; gap: 40px; }
   .compliance-layout { grid-template-columns: 1fr; gap: 40px; }
   .steps { grid-template-columns: 1fr 1fr; }
   .step::after { display: none; }
   .stats-bar { grid-template-columns: 1fr 1fr; }
+  .fcc-inner { grid-template-columns: 1fr; gap: 48px; }
+  .audit-inner { grid-template-columns: 1fr; gap: 48px; }
 }
 @media (max-width: 640px) {
   nav { padding: 16px 20px; grid-template-columns: 1fr auto; }
   .nav-links { display: none; }
   .form-row { grid-template-columns: 1fr; }
-  .hero { padding: 120px 20px 60px; }
+  .hero {
+    padding: 100px 20px 60px;
+    justify-content: flex-start;
+    height: auto;
+    min-height: 100vh;
+  }
+  .hero-content {
+    max-width: 100%;
+    padding-top: 12px;
+  }
+  .hero h1 { font-size: clamp(32px, 9vw, 52px); }
+  .hero p { max-width: 100%; font-size: 14px; }
+  .fcc-section { padding: 60px 20px; }
+  .audit-section { padding: 60px 20px; }
   section { padding: 60px 20px; }
   .stat-item { padding: 24px 20px; }
   .steps { grid-template-columns: 1fr; }
   .stats-bar { grid-template-columns: 1fr 1fr; }
   footer { flex-direction: column; gap: 12px; text-align: center; }
+  .audit-stat-cards { grid-template-columns: repeat(3, 1fr); }
+  .audit-events-head { display: none; }
+  .audit-event-row { grid-template-columns: 1fr 1fr; font-size: 10px; }
+  .audit-event-ts, .audit-event-ref { font-size: 9px; }
+  .fcc-fields-head { display: none; }
+  .fcc-field-row { grid-template-columns: 1fr 1fr; }
 }
