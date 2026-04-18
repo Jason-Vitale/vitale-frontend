@@ -543,16 +543,6 @@ section {
   padding: 36px 28px;
   position: relative;
 }
-.step::after {
-  content: '→';
-  position: absolute;
-  right: -12px;
-  top: 36px;
-  font-size: 16px;
-  color: var(--cyan);
-  z-index: 2;
-}
-.step:last-child::after { display: none; }
 .step-num {
   font-family: var(--font-display);
   font-style: italic;
@@ -1313,6 +1303,187 @@ footer p {
 }
 .audit-action-btn--primary:hover { opacity: 0.85; color: var(--bg); }
 
+/* ── STATS BAR LIVE TICK ────────────────────────────────────────── */
+.stat-tick {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--green);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+/* ── ORBITAL TRACKER ────────────────────────────────────────────── */
+.orbital-section {
+  background: var(--bg);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 96px 48px;
+  overflow: hidden;
+  position: relative;
+}
+.orbital-section::before {
+  content: '';
+  position: absolute;
+  top: 10%;
+  right: -20%;
+  width: 700px;
+  height: 700px;
+  background: radial-gradient(circle, rgba(0,180,255,0.08), transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+.orbital-inner {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 72px;
+  align-items: center;
+  position: relative;
+  z-index: 1;
+}
+.orbital-copy h2 em {
+  font-style: normal;
+  color: var(--cyan);
+}
+.orbital-graphic {
+  position: relative;
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+  aspect-ratio: 1 / 1;
+}
+.orbital-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Data streams flowing into earth */
+.stream {
+  stroke-dasharray: 14 220;
+  stroke-linecap: round;
+  opacity: 0.75;
+  animation: stream-flow 3.2s linear infinite;
+}
+.stream-1 { animation-delay: 0s; }
+.stream-2 { animation-delay: 0.8s; }
+.stream-3 { animation-delay: 1.6s; }
+.stream-4 { animation-delay: 2.4s; }
+@keyframes stream-flow {
+  from { stroke-dashoffset: 234; }
+  to   { stroke-dashoffset: 0;   }
+}
+
+/* Ground stations blink */
+.ground-stations .station { opacity: 0.3; transform-origin: center; transform-box: fill-box; }
+.station-1 { animation: station-blink 2.4s ease-in-out 0s    infinite; }
+.station-2 { animation: station-blink 2.4s ease-in-out 0.6s  infinite; }
+.station-3 { animation: station-blink 2.4s ease-in-out 1.2s  infinite; }
+.station-4 { animation: station-blink 2.4s ease-in-out 1.8s  infinite; }
+@keyframes station-blink {
+  0%,100% { opacity: 0.3; filter: none; }
+  50%     { opacity: 1;   filter: drop-shadow(0 0 6px #00B4FF); }
+}
+
+/* Orbital chips */
+.orbital-chips {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 40px;
+  max-width: 480px;
+}
+.orbital-chip {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-top: 2px solid var(--cyan);
+  padding: 14px 14px 12px;
+}
+.orbital-chip--amber {
+  border-top-color: var(--amber);
+}
+.orbital-chip-num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 22px;
+  color: var(--cyan);
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin-bottom: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.orbital-chip--amber .orbital-chip-num { color: var(--amber); }
+.orbital-chip-label {
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.orbital-chip-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--text-dim);
+  letter-spacing: 0.08em;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ── PILLAR ANIMATED SVG ICONS ──────────────────────────────────── */
+.pillar-icon--svg {
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: rgba(0,180,255,0.04);
+  border-color: rgba(0,180,255,0.25);
+}
+.pillar-svg {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* ── HOW IT WORKS PIPELINE ──────────────────────────────────────── */
+.steps-pipeline {
+  margin: 24px 0 36px;
+  width: 100%;
+  max-width: 1200px;
+  margin-left: auto;
+  margin-right: auto;
+}
+.pipeline-svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.pipe-dash {
+  animation: pipe-flow 3.5s linear infinite;
+}
+@keyframes pipe-flow {
+  from { stroke-dashoffset: 0;  }
+  to   { stroke-dashoffset: -72; }
+}
+
+/* ── REDUCED MOTION ─────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .stream, .station-1, .station-2, .station-3, .station-4,
+  .pipe-dash, .live-dot, .sat-pulsing {
+    animation: none !important;
+  }
+  .orbital-svg animate,
+  .orbital-svg animateTransform,
+  .pipeline-svg animate,
+  .pipeline-svg animateMotion {
+    display: none;
+  }
+}
+
 @media (max-width: 1024px) {
   .blotter-widget { display: none; }
   .hero-content { max-width: 60%; }
@@ -1320,10 +1491,12 @@ footer p {
   .enterprise-grid { grid-template-columns: 1fr; gap: 40px; }
   .compliance-layout { grid-template-columns: 1fr; gap: 40px; }
   .steps { grid-template-columns: 1fr 1fr; }
-  .step::after { display: none; }
   .stats-bar { grid-template-columns: 1fr 1fr; }
   .fcc-inner { grid-template-columns: 1fr; gap: 48px; }
   .audit-inner { grid-template-columns: 1fr; gap: 48px; }
+  .orbital-inner { grid-template-columns: 1fr; gap: 48px; }
+  .orbital-graphic { max-width: 480px; }
+  .steps-pipeline { display: none; }
 }
 @media (max-width: 640px) {
   nav { padding: 16px 20px; grid-template-columns: 1fr auto; }

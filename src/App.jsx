@@ -1,6 +1,7 @@
 import Nav from './components/Nav';
 import Hero from './components/Hero';
 import StatsBar from './components/StatsBar';
+import OrbitalTracker from './components/OrbitalTracker';
 import Platform from './components/Platform';
 import FCCIngest from './components/FCCIngest';
 import ComplianceMatrix from './components/ComplianceMatrix';
@@ -16,6 +17,7 @@ export default function App() {
       <Nav />
       <Hero />
       <StatsBar />
+      <OrbitalTracker />
       <Platform />
       <FCCIngest />
       <ComplianceMatrix />
