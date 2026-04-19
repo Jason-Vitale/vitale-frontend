@@ -1,13 +1,10 @@
 import Nav from './components/Nav';
 import Hero from './components/Hero';
-import StatsBar from './components/StatsBar';
-import OrbitalTracker from './components/OrbitalTracker';
-import Platform from './components/Platform';
-import FCCIngest from './components/FCCIngest';
-import ComplianceMatrix from './components/ComplianceMatrix';
-import AuditFeed from './components/AuditFeed';
-import Enterprise from './components/Enterprise';
-import HowItWorks from './components/HowItWorks';
+import Problem from './components/Problem';
+import Modules from './components/Modules';
+import Regulatory from './components/Regulatory';
+import WhyVitale from './components/WhyVitale';
+import WhoItsFor from './components/WhoItsFor';
 import CTA from './components/CTA';
 import Footer from './components/Footer';
 
@@ -16,14 +13,11 @@ export default function App() {
     <>
       <Nav />
       <Hero />
-      <StatsBar />
-      <OrbitalTracker />
-      <Platform />
-      <FCCIngest />
-      <ComplianceMatrix />
-      <AuditFeed />
-      <Enterprise />
-      <HowItWorks />
+      <Problem />
+      <Modules />
+      <Regulatory />
+      <WhyVitale />
+      <WhoItsFor />
       <CTA />
       <Footer />
     </>
