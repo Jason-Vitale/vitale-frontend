@@ -1,179 +1,301 @@
 import { useEffect, useState } from 'react';
 
 /**
- * ODAR Studio filing panel — animated product screenshot.
- * Text lines progressively render, the orbit diagram plots itself,
- * and the status line certifies the filing as ready.
+ * ODAR Studio — hero product panel.
+ * Renders as a miniature, realistic application UI:
+ *   • left sidebar: mission library + section outline with a moving "current section" indicator
+ *   • main pane: breadcrumb, section title, field table with real values, orbit card
+ *   • footer: status line transitioning draft → validating → filing-ready
+ * No gradient-bar text — every visible element is a real label, value, or cite.
  */
-function FilingPanel() {
-  const [phase, setPhase] = useState(0); // 0..4
-  useEffect(() => {
-    const cycle = () => {
-      setPhase(0);
-      const t1 = setTimeout(() => setPhase(1), 400);
-      const t2 = setTimeout(() => setPhase(2), 1200);
-      const t3 = setTimeout(() => setPhase(3), 2000);
-      const t4 = setTimeout(() => setPhase(4), 3000);
-      const t5 = setTimeout(cycle, 7000);
-      return () => [t1, t2, t3, t4, t5].forEach(clearTimeout);
-    };
-    const stop = cycle();
-    return stop;
-  }, []);
 
-  const lineWidths = ['88%', '72%', '94%', '65%', '80%', '58%'];
+const SECTIONS = [
+  { n: '§1', label: 'Abstract' },
+  { n: '§2', label: 'Mission profile' },
+  { n: '§3', label: 'Orbital parameters' },
+  { n: '§4', label: 'Debris assessment' },
+  { n: '§5', label: 'Conjunction risk' },
+  { n: '§6', label: 'Post-mission disposal' },
+  { n: '§7', label: 'Certification' },
+];
 
+const MISSIONS = [
+  { id: 'LEO-017', org: 'Meridian LLC',  active: true  },
+  { id: 'LEO-031', org: 'Arclight Corp', active: false },
+  { id: 'SSO-044', org: 'Crestline Ltd', active: false },
+];
+
+const FIELD_TABLE = [
+  { k: 'Apogee',              v: '548 km',          cite: '47 CFR §25.283' },
+  { k: 'Perigee',             v: '522 km',          cite: 'NASA-STD-8719.14C §4.5' },
+  { k: 'Inclination',         v: '97.6°',           cite: 'ITU RR Art. 22' },
+  { k: 'RAAN (epoch)',        v: '15.24°',          cite: '47 CFR §25.114' },
+  { k: 'Eccentricity',        v: '0.0019',          cite: 'ODAR §3.2' },
+  { k: 'Collision prob (Pc)', v: '< 1 × 10⁻⁴',      cite: '47 CFR §25.283(c)', blue: true },
+  { k: 'Disposal window',     v: '≤ 5 yr',          cite: 'FCC 22-74',         blue: true },
+  { k: 'DOW (probability)',   v: '0.984',           cite: 'NASA-STD §4.7' },
+];
+
+function OrbitDiagram() {
   return (
-    <div className="filing-panel">
-      <div className="panel-chrome">
-        <div className="panel-dots">
-          <span style={{ background: '#C37A7A' }} />
-          <span style={{ background: '#D6BC8A' }} />
-          <span style={{ background: '#8AB69A' }} />
-        </div>
-        <div className="panel-title">ODAR Studio · Vitale</div>
-        <div className="panel-pill">Draft</div>
-      </div>
+    <svg viewBox="0 0 220 160" className="odar-orbit-svg" aria-hidden="true">
+      <defs>
+        <radialGradient id="hero-earth" cx="42%" cy="40%">
+          <stop offset="0%"  stopColor="#1B2E48" />
+          <stop offset="70%" stopColor="#0B1626" />
+          <stop offset="100%" stopColor="#050A16" />
+        </radialGradient>
+        <linearGradient id="hero-orbit" x1="0" x2="1" y1="0" y2="0">
+          <stop offset="0%"   stopColor="rgba(75,156,211,0.2)" />
+          <stop offset="50%"  stopColor="rgba(75,156,211,0.9)" />
+          <stop offset="100%" stopColor="rgba(75,156,211,0.2)" />
+        </linearGradient>
+      </defs>
 
-      <div className="filing-body">
-        <div className="sweep-line" />
+      {/* reference frame ticks */}
+      <g stroke="rgba(164,192,222,0.14)" strokeWidth="0.5">
+        {Array.from({ length: 13 }).map((_, i) => (
+          <line key={`h${i}`} x1="10" x2="210" y1={20 + i * 10} y2={20 + i * 10} />
+        ))}
+        {Array.from({ length: 21 }).map((_, i) => (
+          <line key={`v${i}`} y1="20" y2="140" x1={10 + i * 10} x2={10 + i * 10} />
+        ))}
+      </g>
+      <g stroke="rgba(164,192,222,0.3)" strokeWidth="0.6">
+        <line x1="10" y1="140" x2="210" y2="140" />
+        <line x1="10" y1="140" x2="10" y2="20" />
+      </g>
 
-        <div className="filing-meta">
-          <div>
-            <div className="filing-meta-title">
-              Orbital Debris Assessment — LEO-017
-            </div>
-            <div className="filing-meta-sub">
-              47 CFR § 5.64(b) · NASA-STD-8719.14C
-            </div>
-          </div>
-          <div className="filing-meta-id">VIT-ODAR-0421</div>
-        </div>
+      {/* axis labels */}
+      <g fontFamily="IBM Plex Mono, monospace" fontSize="6.5" fill="#6B7590" letterSpacing="0.14em">
+        <text x="10" y="152">0°</text>
+        <text x="105" y="152" textAnchor="middle">180°</text>
+        <text x="205" y="152" textAnchor="end">360°</text>
+        <text x="4" y="142" textAnchor="end">0</text>
+        <text x="4" y="82"  textAnchor="end">700</text>
+        <text x="4" y="24"  textAnchor="end">1400</text>
+        <text x="106" y="14" textAnchor="middle" fill="#8892A8" letterSpacing="0.22em">GROUND TRACK · km</text>
+      </g>
 
-        <div>
-          <div className="filing-section-label">§ 3 · Orbital parameters</div>
-          <div className="filing-text-lines">
-            {phase >= 1 &&
-              lineWidths.slice(0, 3).map((w, i) => (
-                <div
-                  key={`a-${i}`}
-                  className="filing-text-line"
-                  style={{
-                    width: w,
-                    animationDelay: `${i * 0.12}s`,
-                  }}
-                />
-              ))}
-          </div>
-        </div>
+      {/* Earth silhouette (bottom band) */}
+      <rect x="10" y="130" width="200" height="10" fill="url(#hero-earth)" opacity="0.8" />
 
-        {phase >= 2 && (
-          <div className="filing-orbit">
-            <div className="filing-orbit-meta">
-              <span className="filing-orbit-key">Apogee</span>
-              <span className="filing-orbit-val">548 km</span>
-              <span className="filing-orbit-key">Perigee</span>
-              <span className="filing-orbit-val">522 km</span>
-              <span className="filing-orbit-key">Inclination</span>
-              <span className="filing-orbit-val">97.6°</span>
-              <span className="filing-orbit-key">P<sub>C</sub> limit</span>
-              <span className="filing-orbit-val accent">{'< 10⁻⁴'}</span>
-              <span className="filing-orbit-key">PMD window</span>
-              <span className="filing-orbit-val">≤ 5 yr</span>
-            </div>
-            <OrbitDiagram show={phase >= 2} />
-          </div>
-        )}
+      {/* orbit sinusoid */}
+      <path
+        d="M10,92 C35,40 70,40 95,92 C120,144 155,144 180,92 C195,60 205,48 210,40"
+        fill="none"
+        stroke="url(#hero-orbit)"
+        strokeWidth="1.4"
+        strokeDasharray="320"
+        strokeDashoffset="0"
+        style={{ filter: 'drop-shadow(0 0 6px rgba(75,156,211,0.35))' }}
+      />
 
-        <div>
-          <div className="filing-section-label">§ 6 · Disposal plan</div>
-          <div className="filing-text-lines">
-            {phase >= 3 &&
-              lineWidths.slice(2, 6).map((w, i) => (
-                <div
-                  key={`b-${i}`}
-                  className="filing-text-line"
-                  style={{
-                    width: w,
-                    animationDelay: `${i * 0.12}s`,
-                  }}
-                />
-              ))}
-          </div>
-        </div>
+      {/* active satellite marker */}
+      <g>
+        <circle cx="95" cy="92" r="3.2" fill="#7BAFD4"
+                style={{ filter: 'drop-shadow(0 0 5px rgba(75,156,211,0.9))' }}>
+          <animateMotion
+            path="M0,0 C25,-52 60,-52 85,0 C110,52 145,52 170,0 C185,-32 195,-44 200,-52"
+            dur="9s"
+            repeatCount="indefinite"
+          />
+        </circle>
+      </g>
 
-        <div className="filing-status">
-          {phase >= 4 ? (
-            <>
-              <span className="filing-status-ready">
-                <span className="filing-status-dot" />
-                Filing-ready · mapped to active docket
-              </span>
-              <span className="filing-status-cite">
-                FCC 22-74 · effective 2024-09-29
-              </span>
-            </>
-          ) : (
-            <>
-              <span className="filing-status-cite">
-                Generating orbital debris assessment…
-              </span>
-              <span className="filing-status-cite">
-                {String(Math.min(phase * 25, 99)).padStart(2, '0')}%
-              </span>
-            </>
-          )}
-        </div>
-      </div>
-    </div>
+      {/* annotation box */}
+      <g>
+        <rect x="146" y="28" width="60" height="28" fill="rgba(11,22,38,0.9)"
+              stroke="rgba(75,156,211,0.45)" strokeWidth="0.6" rx="1" />
+        <text x="152" y="40" fontFamily="IBM Plex Mono, monospace" fontSize="7" fill="#7BAFD4" letterSpacing="0.1em">
+          APOGEE
+        </text>
+        <text x="152" y="50" fontFamily="IBM Plex Mono, monospace" fontSize="8" fill="#EDF1F7" letterSpacing="0.06em">
+          548 km
+        </text>
+      </g>
+    </svg>
   );
 }
 
-// eslint-disable-next-line react/prop-types
-function OrbitDiagram({ show }) {
+function OdarStudio() {
+  const [activeSection, setActiveSection] = useState(2); // index into SECTIONS
+  const [visibleRows,   setVisibleRows]   = useState(0);
+  const [status,        setStatus]        = useState('validating'); // drafting | validating | ready
+  const [progress,      setProgress]      = useState(0);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timeouts = [];
+    const step = (fn, d) => timeouts.push(setTimeout(() => !cancelled && fn(), d));
+
+    const cycle = () => {
+      setActiveSection(2);
+      setVisibleRows(0);
+      setStatus('drafting');
+      setProgress(12);
+
+      // reveal rows
+      FIELD_TABLE.forEach((_, i) => {
+        step(() => setVisibleRows(i + 1), 300 + i * 180);
+      });
+
+      // move to validating then ready, push progress
+      step(() => { setProgress(58); setStatus('validating'); }, 300 + FIELD_TABLE.length * 180 + 300);
+      step(() => { setActiveSection(3); setProgress(72); }, 300 + FIELD_TABLE.length * 180 + 900);
+      step(() => { setActiveSection(5); setProgress(86); }, 300 + FIELD_TABLE.length * 180 + 1700);
+      step(() => { setStatus('ready');  setActiveSection(6); setProgress(100); }, 300 + FIELD_TABLE.length * 180 + 2500);
+
+      step(cycle, 300 + FIELD_TABLE.length * 180 + 7500);
+    };
+    cycle();
+    return () => { cancelled = true; timeouts.forEach(clearTimeout); };
+  }, []);
+
   return (
-    <svg
-      viewBox="0 0 200 180"
-      className="filing-orbit-svg"
-      aria-hidden="true"
-    >
-      <defs>
-        <radialGradient id="earth-hero" cx="40%" cy="40%">
-          <stop offset="0%" stopColor="#1B2B44" />
-          <stop offset="100%" stopColor="#0A1220" />
-        </radialGradient>
-      </defs>
+    <div className="product-panel">
+      <div className="panel-chrome">
+        <div className="panel-dots">
+          <span style={{ background: '#B7736F' }} />
+          <span style={{ background: '#C9B28A' }} />
+          <span style={{ background: '#6FA98B' }} />
+        </div>
+        <div className="panel-title">ODAR Studio — VIT-LEO-017.0421</div>
+        <div className="panel-pill">Draft · v4</div>
+      </div>
 
-      {/* Earth */}
-      <circle cx="100" cy="90" r="28" fill="url(#earth-hero)"
-              stroke="rgba(214,188,138,0.35)" strokeWidth="0.8" />
-      <ellipse cx="100" cy="90" rx="28" ry="8" fill="none"
-               stroke="rgba(214,188,138,0.2)" strokeWidth="0.6" />
-      <ellipse cx="100" cy="90" rx="10" ry="28" fill="none"
-               stroke="rgba(214,188,138,0.2)" strokeWidth="0.6" />
+      <div className="odar-progress">
+        <div className="odar-progress-fill" style={{ width: `${progress}%` }} />
+      </div>
 
-      {/* Orbit 1 — primary (plots in) */}
-      <ellipse cx="100" cy="90" rx="74" ry="26" fill="none"
-               stroke="#D6BC8A" strokeWidth="0.9"
-               strokeDasharray="260"
-               strokeDashoffset={show ? '0' : '260'}
-               style={{ transition: 'stroke-dashoffset 1.4s ease-out' }} />
+      <div className="odar-studio">
+        {/* Sidebar */}
+        <aside className="odar-sidebar">
+          <div className="odar-sidebar-group">
+            <div className="odar-sidebar-label">Missions</div>
+            {MISSIONS.map((m) => (
+              <div
+                key={m.id}
+                className={`odar-sidebar-item ${m.active ? 'odar-sidebar-item--active' : ''}`}
+              >
+                <span className="sb-dot" />
+                <span>{m.id}</span>
+                <span className="sb-num">{m.org.split(' ')[0].slice(0, 3).toUpperCase()}</span>
+              </div>
+            ))}
+          </div>
 
-      {/* Orbit 2 — inclined */}
-      <g transform="rotate(38 100 90)">
-        <ellipse cx="100" cy="90" rx="84" ry="22" fill="none"
-                 stroke="rgba(122,163,204,0.55)" strokeWidth="0.8"
-                 strokeDasharray="270"
-                 strokeDashoffset={show ? '0' : '270'}
-                 style={{ transition: 'stroke-dashoffset 1.6s 0.2s ease-out' }} />
-      </g>
+          <div className="odar-sidebar-group">
+            <div className="odar-sidebar-label">Outline</div>
+            {SECTIONS.map((s, i) => {
+              const isActive = i === activeSection;
+              const isDone   = i < activeSection;
+              return (
+                <div
+                  key={s.n}
+                  className={`odar-sidebar-item ${
+                    isActive ? 'odar-sidebar-item--active' : isDone ? 'odar-sidebar-item--done' : ''
+                  }`}
+                >
+                  <span className="sb-num">{s.n}</span>
+                  <span>{s.label}</span>
+                  <span className="sb-dot" />
+                </div>
+              );
+            })}
+          </div>
+        </aside>
 
-      {/* Satellite orbiting */}
-      <g className="orbit-rotate" style={{ transformOrigin: '100px 90px' }}>
-        <circle cx="174" cy="90" r="2.4" fill="#D6BC8A"
-                style={{ filter: 'drop-shadow(0 0 4px rgba(214,188,138,0.9))' }} />
-      </g>
-    </svg>
+        {/* Main */}
+        <div className="odar-main">
+          <div className="odar-breadcrumb">
+            <div className="odar-breadcrumb-path">
+              VIT-LEO-017
+              <span className="crumb-sep">/</span>
+              ODAR
+              <span className="crumb-sep">/</span>
+              <span className="crumb-active">{SECTIONS[activeSection]?.label}</span>
+            </div>
+            <div className="odar-breadcrumb-save">
+              <span className="save-dot" />
+              {status === 'ready' ? 'Saved · filed-ready' : status === 'validating' ? 'Validating against docket' : 'Autosaved 4s ago'}
+            </div>
+          </div>
+
+          <div className="odar-body">
+            <div>
+              <div className="odar-title">{SECTIONS[activeSection]?.n} · {SECTIONS[activeSection]?.label}</div>
+              <div className="odar-subtitle">
+                Per 47 CFR § 25.114 · NASA-STD-8719.14C · FCC 22-74
+              </div>
+            </div>
+
+            <div className="odar-content">
+              <div className="odar-table">
+                <div className="odar-table-head">
+                  <span>Parameter</span>
+                  <span>Value</span>
+                  <span>Cite</span>
+                </div>
+                {FIELD_TABLE.slice(0, visibleRows).map((row, i) => (
+                  <div
+                    key={row.k}
+                    className="odar-table-row"
+                    style={{ animationDelay: `${i * 50}ms` }}
+                  >
+                    <span className="odar-table-key">{row.k}</span>
+                    <span className={`odar-table-val ${row.blue ? 'odar-table-val--blue' : ''}`}>
+                      {row.v}
+                    </span>
+                    <span className="odar-cite">{row.cite}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="odar-orbit-card">
+                <div className="odar-orbit-head">
+                  <span>Ground track · plotted</span>
+                  <span className="orbit-plotted">
+                    <span className="save-dot" style={{ background: '#7BAFD4', boxShadow: '0 0 0 3px rgba(75,156,211,0.18)' }} />
+                    Live
+                  </span>
+                </div>
+                <OrbitDiagram />
+                <div className="odar-orbit-caption">
+                  <span>SSO · 97.6°</span>
+                  <span>TLE matched · 2s ago</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="odar-footer">
+            <div className="odar-footer-status">
+              {status === 'ready' ? (
+                <>
+                  <span className="odar-footer-dot odar-footer-dot--ok" />
+                  Filing-ready · mapped to active docket
+                </>
+              ) : status === 'validating' ? (
+                <>
+                  <span className="odar-footer-dot" />
+                  Validating against live rulemaking
+                </>
+              ) : (
+                <>
+                  <span className="odar-footer-dot" />
+                  Drafting {SECTIONS[activeSection]?.label.toLowerCase()}…
+                </>
+              )}
+            </div>
+            <div className="odar-footer-cite">FCC 22-74 · effective 2024-09-29</div>
+            <button type="button" className="odar-footer-btn">
+              {status === 'ready' ? 'Submit →' : 'Review'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -219,7 +341,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <FilingPanel />
+        <OdarStudio />
       </div>
     </section>
   );

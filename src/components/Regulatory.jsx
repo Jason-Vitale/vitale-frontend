@@ -1,8 +1,51 @@
+// eslint-disable-next-line react/prop-types
+function SealRing({ label }) {
+  return (
+    <svg viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <linearGradient id={`seal-${label}`} x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%"   stopColor="rgba(75,156,211,0.25)" />
+          <stop offset="100%" stopColor="rgba(75,156,211,0)" />
+        </linearGradient>
+      </defs>
+      <circle cx="32" cy="32" r="28" fill={`url(#seal-${label})`}
+              stroke="rgba(75,156,211,0.45)" strokeWidth="0.8" />
+      <circle cx="32" cy="32" r="22" fill="none"
+              stroke="rgba(164,192,222,0.25)" strokeWidth="0.6" strokeDasharray="1 3" />
+      {/* tick marks around ring */}
+      <g stroke="rgba(164,192,222,0.35)" strokeWidth="0.6">
+        {Array.from({ length: 24 }).map((_, i) => (
+          <line
+            key={i}
+            x1="32"
+            y1="6"
+            x2="32"
+            y2={i % 6 === 0 ? 10 : 8}
+            transform={`rotate(${i * 15} 32 32)`}
+          />
+        ))}
+      </g>
+      <text
+        x="32" y="36"
+        textAnchor="middle"
+        fontFamily="Fraunces, serif"
+        fontSize="15"
+        fontWeight="500"
+        fontStyle="italic"
+        fill="#EDF1F7"
+        letterSpacing="-0.02em"
+      >
+        {label}
+      </text>
+    </svg>
+  );
+}
+
 const AGENCIES = [
-  { glyph: 'F', name: 'FCC Space Bureau' },
-  { glyph: 'N', name: 'NOAA CRSRA' },
-  { glyph: 'A', name: 'FAA AST' },
-  { glyph: 'S', name: 'NASA OSMA' },
+  { mark: 'FCC',  name: 'FCC Space Bureau' },
+  { mark: 'NOAA', name: 'NOAA CRSRA' },
+  { mark: 'FAA',  name: 'FAA AST' },
+  { mark: 'NASA', name: 'NASA OSMA' },
 ];
 
 const RULES = [
@@ -55,9 +98,11 @@ export default function Regulatory() {
         </p>
 
         <div className="regulatory-logos">
-          {AGENCIES.map(({ glyph, name }) => (
+          {AGENCIES.map(({ mark, name }) => (
             <div className="reg-logo" key={name}>
-              <div className="reg-logo-glyph">{glyph}</div>
+              <div className="reg-seal">
+                <SealRing label={mark} />
+              </div>
               <div className="reg-logo-name">{name}</div>
             </div>
           ))}
