@@ -22,6 +22,7 @@ export default function SearchPage() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -37,14 +38,21 @@ export default function SearchPage() {
       setResults([]);
       setHasSearched(false);
       setLoading(false);
+      setError(null);
       return;
     }
     setLoading(true);
+    setError(null);
     const timer = setTimeout(() => {
       searchObjects({ q: trimmed, type })
         .then((data) => {
           setResults(data.results);
           setHasSearched(true);
+        })
+        .catch((err) => {
+          setError(err.message || 'Search failed. Try again.');
+          setResults([]);
+          setHasSearched(false);
         })
         .finally(() => setLoading(false));
     }, 280);
@@ -90,7 +98,7 @@ export default function SearchPage() {
         </div>
 
         <div className="search-results">
-          {!hasSearched && !loading && (
+          {!hasSearched && !loading && !error && (
             <div className="search-state search-state--empty">
               Start typing to search the orbital catalog.
             </div>
@@ -101,6 +109,10 @@ export default function SearchPage() {
               <Spinner size={16} />
               Searching…
             </div>
+          )}
+
+          {error && !loading && (
+            <div className="search-state search-state--no-results">{error}</div>
           )}
 
           {hasSearched && (
@@ -116,24 +128,29 @@ export default function SearchPage() {
           )}
 
           <div className="results-list">
-            {results.map((obj) => (
-              <button
-                key={obj.noradId}
-                type="button"
-                className="result-row"
-                onClick={() => navigate(`/objects/${obj.noradId}`)}
-              >
-                <TypeIcon type={obj.type} />
-                <div className="result-row-main">
-                  <div className="result-row-name">{obj.name}</div>
-                  <div className="result-row-sub">
-                    NORAD {obj.noradId} · {obj.country} · Epoch {formatRelativeTime(obj.epoch)}
+            {results.map((obj) => {
+              const subParts = [
+                `NORAD ${obj.noradId}`,
+                obj.country,
+                obj.launchDate ? `Launched ${formatRelativeTime(obj.launchDate)}` : null,
+              ].filter(Boolean);
+              return (
+                <button
+                  key={obj.noradId}
+                  type="button"
+                  className="result-row"
+                  onClick={() => navigate(`/objects/${obj.noradId}`)}
+                >
+                  <TypeIcon type={obj.type} />
+                  <div className="result-row-main">
+                    <div className="result-row-name">{obj.name}</div>
+                    <div className="result-row-sub">{subParts.join(' · ')}</div>
                   </div>
-                </div>
-                <span className="type-badge">{TYPE_LABELS[obj.type] || obj.type}</span>
-                <ChevronRight className="result-row-chevron" size={18} strokeWidth={2} />
-              </button>
-            ))}
+                  <span className="type-badge">{TYPE_LABELS[obj.type] || obj.type}</span>
+                  <ChevronRight className="result-row-chevron" size={18} strokeWidth={2} />
+                </button>
+              );
+            })}
           </div>
         </div>
 

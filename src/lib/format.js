@@ -30,8 +30,17 @@ export function formatTimestamp(isoString) {
   });
 }
 
+// Date-only fields (launch_date, decay_date) -- no time component to show.
+export function formatDate(dateString) {
+  if (!dateString) return null;
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return null;
+  return d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
+}
+
 export const TYPE_LABELS = {
   payload: 'Payload',
   'rocket-body': 'Rocket body',
   debris: 'Debris',
+  unknown: 'Unknown',
 };

@@ -4,7 +4,7 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import TypeIcon from '../components/TypeIcon';
 import Spinner from '../components/Spinner';
 import { getObject, getObjectAudit } from '../lib/api';
-import { formatRelativeTime, formatTimestamp, TYPE_LABELS } from '../lib/format';
+import { formatDate, formatTimestamp, TYPE_LABELS } from '../lib/format';
 
 export default function ObjectDetailPage() {
   const { noradId } = useParams();
@@ -12,27 +12,50 @@ export default function ObjectDetailPage() {
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [eventsError, setEventsError] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    Promise.all([getObject(noradId), getObjectAudit(noradId)])
-      .then(([obj, audit]) => {
+    setEvents([]);
+    setEventsError(null);
+
+    getObject(noradId)
+      .then((obj) => {
         if (cancelled) return;
         setObject(obj);
-        setEvents(audit.events);
+        setLoading(false);
+        // Audit history is fetched independently so a failure here doesn't
+        // take down the whole page when the object itself loaded fine.
+        getObjectAudit(noradId)
+          .then((audit) => {
+            if (!cancelled) setEvents(audit.events);
+          })
+          .catch((err) => {
+            if (!cancelled) setEventsError(err.message || 'Failed to load audit history.');
+          });
       })
       .catch((err) => {
-        if (!cancelled) setError(err.message || 'Failed to load object');
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setError(err.message || 'Failed to load object.');
+          setLoading(false);
+        }
       });
+
     return () => {
       cancelled = true;
     };
   }, [noradId]);
+
+  const metaParts = object
+    ? [
+        `NORAD ${object.noradId}`,
+        object.cosparId,
+        object.country,
+        TYPE_LABELS[object.type] || object.type,
+      ].filter(Boolean)
+    : [];
 
   return (
     <div className="detail-page">
@@ -55,29 +78,28 @@ export default function ObjectDetailPage() {
             <TypeIcon type={object.type} size={22} />
             <div>
               <div className="detail-name">{object.name}</div>
-              <div className="detail-sub">
-                NORAD {object.noradId} · {object.cosparId} · {object.country} ·{' '}
-                {TYPE_LABELS[object.type] || object.type}
-              </div>
+              <div className="detail-sub">{metaParts.join(' · ')}</div>
             </div>
           </div>
 
           <div className="metric-grid">
             <div className="metric-card">
-              <div className="metric-label">Apogee</div>
-              <div className="metric-value">{object.apogeeKm.toLocaleString()} km</div>
+              <div className="metric-label">Launch date</div>
+              <div className="metric-value">{formatDate(object.launchDate) || 'Unknown'}</div>
             </div>
             <div className="metric-card">
-              <div className="metric-label">Perigee</div>
-              <div className="metric-value">{object.perigeeKm.toLocaleString()} km</div>
+              <div className="metric-label">Site</div>
+              <div className="metric-value">{object.site || 'Unknown'}</div>
             </div>
             <div className="metric-card">
-              <div className="metric-label">Inclination</div>
-              <div className="metric-value">{object.inclinationDeg}°</div>
+              <div className="metric-label">RCS size</div>
+              <div className="metric-value">{object.rcsSize || 'Unknown'}</div>
             </div>
             <div className="metric-card">
-              <div className="metric-label">Last epoch</div>
-              <div className="metric-value">{formatRelativeTime(object.epoch)}</div>
+              <div className="metric-label">Status</div>
+              <div className="metric-value">
+                {object.decayDate ? `Decayed ${formatDate(object.decayDate)}` : 'Active'}
+              </div>
             </div>
           </div>
 
@@ -96,9 +118,15 @@ export default function ObjectDetailPage() {
 
           <h2 className="section-heading">Audit history</h2>
 
-          {events.length === 0 ? (
+          {eventsError && (
+            <div className="search-state search-state--no-results">{eventsError}</div>
+          )}
+
+          {!eventsError && events.length === 0 && (
             <div className="search-state search-state--no-results">No audit events on record.</div>
-          ) : (
+          )}
+
+          {!eventsError && events.length > 0 && (
             <div className="timeline">
               {events.map((event) => (
                 <div key={event.id} className={`timeline-row timeline-row--${event.severity}`}>
@@ -109,7 +137,7 @@ export default function ObjectDetailPage() {
                   <div className="timeline-content">
                     <div className="timeline-ts">{formatTimestamp(event.eventTime)}</div>
                     <div className="timeline-label">{event.label}</div>
-                    <div className="timeline-detail">{event.detail}</div>
+                    {event.detail && <div className="timeline-detail">{event.detail}</div>}
                   </div>
                 </div>
               ))}
