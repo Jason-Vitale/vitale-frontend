@@ -1,16 +1,18 @@
 import { useId } from 'react';
 
-// Inline version of the site favicon artwork (public/favicon.svg), used
-// wherever the wordmark's "V" is set -- ties the browser tab icon and the
-// on-page brand together. gradientId is unique per instance so multiple
-// copies on one page (header + footer + page wordmark) don't collide over
-// the same <linearGradient> id. The main V stroke uses currentColor instead
-// of the favicon's near-black so it stays visible against the dark page
-// background; the trail/satellite keep their original navy tone.
+// Inline version of the site favicon artwork (public/favicon.svg): orbit
+// trail, satellite, and the bold V. viewBox is cropped tight to the union
+// of everything actually drawn (not the favicon file's roomier 256x256)
+// so the element's own bounding box matches its visible ink -- padding
+// left over from an oversized viewBox would otherwise sit as an invisible
+// gap between this and the "itale" that follows it in Wordmark.
+// gradientId is unique per instance so multiple copies on one page
+// (header + footer + page wordmark) don't collide over the same
+// <linearGradient> id.
 export default function BrandMark({ className = '' }) {
   const gradientId = useId();
   return (
-    <svg viewBox="0 0 256 256" className={className} aria-hidden="true" focusable="false">
+    <svg viewBox="0 22 242 198" className={className} aria-hidden="true" focusable="false">
       <defs>
         <linearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="0%">
           <stop offset="0%" stopColor="#1B3A6B" stopOpacity="0" />

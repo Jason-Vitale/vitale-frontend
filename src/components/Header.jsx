@@ -1,14 +1,31 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import TopTracked from './TopTracked';
-import BrandMark from './BrandMark';
+import Wordmark from './Wordmark';
 
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
+  const headerRef = useRef(null);
   const [topTrackedOpen, setTopTrackedOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+
+  // Publishes the header's real rendered height as a CSS variable so fixed
+  // elements below it (the filter/top-tracked sidebars) can offset off the
+  // actual value instead of a hardcoded px guess that drifts out of sync
+  // whenever the header's own size changes (font scaling, content, etc).
+  useLayoutEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const setHeightVar = () => {
+      document.documentElement.style.setProperty('--header-height', `${el.offsetHeight}px`);
+    };
+    setHeightVar();
+    const observer = new ResizeObserver(setHeightVar);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
 
   useEffect(() => {
     if (!topTrackedOpen) return;
@@ -56,10 +73,9 @@ export default function Header() {
 
   return (
     <>
-      <header className="site-header">
+      <header className="site-header" ref={headerRef}>
         <Link to="/" className="site-header-brand" onClick={handleBrandClick}>
-          <BrandMark className="brand-v" />
-          <span>itale</span>
+          <Wordmark />
         </Link>
 
         <div className="site-header-actions">

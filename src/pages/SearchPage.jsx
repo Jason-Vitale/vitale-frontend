@@ -7,7 +7,7 @@ import Spinner from '../components/Spinner';
 import SearchBackground from '../components/SearchBackground';
 import TopTracked from '../components/TopTracked';
 import FilterPanel from '../components/FilterPanel';
-import BrandMark from '../components/BrandMark';
+import Wordmark from '../components/Wordmark';
 import { getCatalog, getStats, getTopTracked, searchObjects } from '../lib/api';
 import { formatRelativeTime, launchWindowKey, TYPE_LABELS } from '../lib/format';
 
@@ -176,8 +176,7 @@ export default function SearchPage() {
         <SearchBackground />
         <header className="search-header">
           <div className="wordmark">
-            <BrandMark className="brand-v" />
-            <span>itale</span>
+            <Wordmark />
           </div>
           <p className="search-subtitle">Orbital object search &amp; audit history</p>
           {trackedObjects !== null && (
