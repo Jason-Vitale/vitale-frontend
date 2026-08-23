@@ -1,12 +1,14 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { X } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 import TopTracked from './TopTracked';
+import BrandMark from './BrandMark';
 
 export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const [topTrackedOpen, setTopTrackedOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   useEffect(() => {
     if (!topTrackedOpen) return;
@@ -21,6 +23,15 @@ export default function Header() {
     };
   }, [topTrackedOpen]);
 
+  useEffect(() => {
+    if (!menuOpen) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setMenuOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [menuOpen]);
+
   const handleBrandClick = (e) => {
     if (location.pathname === '/') {
       e.preventDefault();
@@ -28,31 +39,73 @@ export default function Header() {
     }
   };
 
-  const handleAboutClick = (e) => {
+  const handleSectionLink = (sectionId) => (e) => {
     e.preventDefault();
+    setMenuOpen(false);
     if (location.pathname === '/') {
-      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.getElementById(sectionId)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     } else {
-      navigate('/#about');
+      navigate(`/#${sectionId}`);
     }
+  };
+
+  const handleTopTrackedClick = () => {
+    setMenuOpen(false);
+    setTopTrackedOpen(true);
   };
 
   return (
     <>
       <header className="site-header">
         <Link to="/" className="site-header-brand" onClick={handleBrandClick}>
-          <span className="brand-v">V</span>itale
+          <BrandMark className="brand-v" />
+          <span>itale</span>
         </Link>
+
+        <div className="site-header-actions">
+          <button type="button" className="site-header-about" onClick={handleSectionLink('about')}>
+            About
+          </button>
+          <button type="button" className="site-header-contact" onClick={handleSectionLink('feedback')}>
+            Contact us
+          </button>
+        </div>
+
         <button
           type="button"
-          className="site-header-top-tracked"
-          onClick={() => setTopTrackedOpen(true)}
+          className="site-header-menu-button"
+          onClick={() => setMenuOpen((v) => !v)}
+          aria-label="Menu"
+          aria-expanded={menuOpen}
         >
-          Top tracked
+          <Menu size={20} strokeWidth={2} />
         </button>
-        <button type="button" className="site-header-about" onClick={handleAboutClick}>
-          About
-        </button>
+
+        {menuOpen && (
+          <>
+            {/* Nested inside <header> (rather than a sibling) so it shares the
+                header's stacking context and sits behind .site-header-menu --
+                as a sibling of <header>, its higher z-index would otherwise
+                cover the whole header and swallow clicks meant for the menu
+                items themselves. */}
+            <div className="site-header-menu-backdrop" onClick={() => setMenuOpen(false)} />
+            <div className="site-header-menu">
+              <button type="button" className="site-header-menu-item" onClick={handleTopTrackedClick}>
+                Top tracked
+              </button>
+              <button type="button" className="site-header-menu-item" onClick={handleSectionLink('about')}>
+                About
+              </button>
+              <button
+                type="button"
+                className="site-header-menu-item site-header-menu-item--contact"
+                onClick={handleSectionLink('feedback')}
+              >
+                Contact us
+              </button>
+            </div>
+          </>
+        )}
       </header>
 
       {topTrackedOpen && (

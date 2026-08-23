@@ -7,6 +7,7 @@ import Spinner from '../components/Spinner';
 import SearchBackground from '../components/SearchBackground';
 import TopTracked from '../components/TopTracked';
 import FilterPanel from '../components/FilterPanel';
+import BrandMark from '../components/BrandMark';
 import { getCatalog, getStats, getTopTracked, searchObjects } from '../lib/api';
 import { formatRelativeTime, launchWindowKey, TYPE_LABELS } from '../lib/format';
 
@@ -43,8 +44,8 @@ export default function SearchPage() {
   const location = useLocation();
 
   useEffect(() => {
-    if (location.hash === '#about') {
-      document.getElementById('about')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (location.hash) {
+      document.getElementById(location.hash.slice(1))?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [location.hash]);
 
@@ -174,7 +175,10 @@ export default function SearchPage() {
       <div className="search-page">
         <SearchBackground />
         <header className="search-header">
-          <div className="wordmark"><span className="brand-v">V</span>itale</div>
+          <div className="wordmark">
+            <BrandMark className="brand-v" />
+            <span>itale</span>
+          </div>
           <p className="search-subtitle">Orbital object search &amp; audit history</p>
           {trackedObjects !== null && (
             <div className="tracked-stat">
@@ -302,31 +306,38 @@ export default function SearchPage() {
           <section className="info-section" id="how-it-works">
             <h2 className="info-heading">How search works</h2>
             <p className="info-body">
-              Search matches against object name, NORAD catalog ID, or COSPAR ID. Catalog
-              details are kept current against the Vitale object database, and audit history
-              captures every catalog update, maneuver, and conjunction screening result
-              recorded for the object. Results can be filtered by object type, origin
-              country, and launch window, and are exportable for use in research datasets
-              and third-party reporting.
+              Search matches against object name, NORAD catalog number, or COSPAR
+              international designator. Each record tracks orbital elements (TLE epoch,
+              inclination, RCS size class), launch site, and decay epoch, kept current
+              against the Vitale object database. Audit history logs every TLE update,
+              station-keeping or collision-avoidance maneuver, and conjunction screening
+              result generated against the active catalog, each entry timestamped to the
+              originating event. Results can be filtered by object type, origin country,
+              and launch window, and are exportable for research datasets and third-party
+              reporting.
             </p>
           </section>
 
           <section className="info-section" id="about">
             <h2 className="info-heading">About Vitale</h2>
             <p className="info-body">
-              Vitale continuously monitors orbital object history, including
-              deviations, maneuvers, and catalog changes, so operators, regulators, and
-              researchers have a standing record for FCC and ITU compliance reporting,
-              academic and policy research, and independent verification of orbital
-              activity.
+              Vitale continuously monitors orbital object history, including element set
+              updates, station-keeping and collision-avoidance maneuvers, and RCS and
+              catalog changes. This builds a standing audit trail against FCC orbital
+              debris mitigation filings, ITU frequency coordination and UN Register of
+              Objects submissions, and IADC space debris mitigation guidelines, including
+              post-mission disposal and 25-year deorbit timelines. Operators, regulators, and
+              researchers use that record for compliance verification, academic and
+              policy research, and independent confirmation of on-orbit activity.
             </p>
           </section>
 
           <section className="info-section" id="feedback">
             <div className="feedback-card">
-              <h2 className="info-heading">Suggest an improvement</h2>
+              <h2 className="info-heading">Contact us</h2>
               <p className="info-body">
-                Something missing, or a search that did not behave? Let us know.
+                Report an issue, suggest an improvement, or request audit event
+                onboarding if you operate tracked objects. We read every message.
               </p>
               <FeedbackForm />
             </div>

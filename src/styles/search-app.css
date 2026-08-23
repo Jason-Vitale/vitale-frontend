@@ -51,21 +51,22 @@
   position: sticky;
   top: 0;
   z-index: 20;
-  overflow: hidden;
   background: var(--app-bg);
   border-bottom: 1px solid var(--app-border);
   padding: 16px 24px;
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 12px;
 }
 
 .site-header-brand {
   position: relative;
   justify-self: start;
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-display);
-  font-size: 19px;
+  font-size: 1.75rem;
   font-weight: 600;
   color: var(--app-text);
   text-decoration: none;
@@ -78,12 +79,13 @@
 }
 
 .brand-v {
+  width: auto;
+  height: 2.1em;
+  flex-shrink: 0;
   color: var(--app-accent);
 }
 
 .site-header-about {
-  position: relative;
-  justify-self: end;
   height: 30px;
   padding: 0 14px;
   border-radius: 3px;
@@ -102,30 +104,100 @@
   color: var(--app-accent);
 }
 
-/* Collapsed entry point for the top-tracked sidebar on small screens.
-   Hidden by default; shown only under the phone breakpoint, where the
-   sidebar itself is hidden in favor of this + the modal below. */
-.site-header-top-tracked {
-  display: none;
-  justify-self: center;
+/* Right-hand button cluster, pinned to the far edge of the header by the
+   flex row's justify-content: space-between. Collapses into a single menu
+   button below the phone breakpoint (see .site-header-menu-button). */
+.site-header-actions {
+  flex-shrink: 0;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
+}
+
+.site-header-contact {
   height: 30px;
-  padding: 0 14px;
+  padding: 0 16px;
   border-radius: 3px;
   border: 1px solid var(--app-accent);
-  background: transparent;
-  color: var(--app-accent);
+  background: var(--app-accent);
+  color: #ffffff;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.site-header-contact:hover {
+  opacity: 0.88;
+}
+
+/* Collapsed menu button for the header actions (top-tracked / about /
+   contact) below the phone breakpoint -- hidden by default, see the
+   .site-header-actions / .site-header-menu-button swap in the phone
+   media query further down. */
+.site-header-menu-button {
+  display: none;
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  border: 1px solid var(--app-border);
+  background: transparent;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.site-header-menu-button:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+.site-header-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 24;
+}
+
+.site-header-menu {
+  position: absolute;
+  top: 100%;
+  right: 24px;
+  margin-top: 8px;
+  z-index: 25;
+  display: flex;
+  flex-direction: column;
+  min-width: 168px;
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  background: var(--app-bg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  overflow: hidden;
+}
+
+.site-header-menu-item {
+  padding: 11px 16px;
+  border: none;
+  background: transparent;
+  color: var(--app-text-secondary);
+  font-size: 13px;
+  text-align: left;
   cursor: pointer;
   transition: background 0.15s, color 0.15s;
 }
 
-.site-header-top-tracked:hover {
-  background: var(--app-accent-bg);
+.site-header-menu-item:hover {
+  background: var(--app-surface-hover);
+  color: var(--app-text);
+}
+
+.site-header-menu-item--contact {
+  color: var(--app-accent);
+  font-weight: 600;
 }
 
 /* ── Top-tracked modal (mobile) ─────────────────────────────────── */
@@ -195,8 +267,10 @@
 }
 
 .site-footer-brand {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 1.375rem;
   font-weight: 600;
   color: var(--app-text);
 }
@@ -553,8 +627,10 @@
 }
 
 .wordmark {
+  display: inline-flex;
+  align-items: center;
   font-family: var(--font-display);
-  font-size: 30px;
+  font-size: 3.25rem;
   font-weight: 600;
   color: var(--app-text);
   letter-spacing: 0;
@@ -1167,7 +1243,10 @@
   .search-sidebar {
     display: none;
   }
-  .site-header-top-tracked {
+  .site-header-actions {
+    display: none;
+  }
+  .site-header-menu-button {
     display: inline-flex;
   }
   .detail-page {
@@ -1225,7 +1304,7 @@
 /* Small phones */
 @media (max-width: 380px) {
   .wordmark {
-    font-size: 26px;
+    font-size: 2.25rem;
   }
   .metric-grid {
     grid-template-columns: 1fr 1fr;

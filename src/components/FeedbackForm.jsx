@@ -5,7 +5,7 @@ export default function FeedbackForm() {
 
   if (state.succeeded) {
     return (
-      <div className="feedback-success">Thanks, your suggestion has been sent.</div>
+      <div className="feedback-success">Thanks, your message has been sent.</div>
     );
   }
 
@@ -17,18 +17,18 @@ export default function FeedbackForm() {
         <ValidationError field="email" errors={state.errors} className="feedback-error" />
       </div>
       <div className="feedback-field">
-        <label htmlFor="feedback-message">What should we improve?</label>
+        <label htmlFor="feedback-message">How can we help?</label>
         <textarea
           id="feedback-message"
           name="message"
           rows={3}
-          placeholder="Missing data, a search that didn't work, a feature you'd like…"
+          placeholder="An issue, an improvement, or an audit event onboarding request…"
           required
         />
         <ValidationError field="message" errors={state.errors} className="feedback-error" />
       </div>
       <button type="submit" className="feedback-submit" disabled={state.submitting}>
-        {state.submitting ? 'Sending…' : 'Send suggestion'}
+        {state.submitting ? 'Sending…' : 'Send message'}
       </button>
     </form>
   );

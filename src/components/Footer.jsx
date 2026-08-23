@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
+import BrandMark from './BrandMark';
 
 export default function Footer() {
   const location = useLocation();
@@ -15,7 +16,8 @@ export default function Footer() {
     <footer className="site-footer">
       <div className="site-footer-left">
         <span className="site-footer-brand">
-          <span className="brand-v">V</span>itale
+          <BrandMark className="brand-v" />
+          <span>itale</span>
         </span>
       </div>
       <Link to="/" className="site-footer-link" onClick={handleBackToSearch}>
