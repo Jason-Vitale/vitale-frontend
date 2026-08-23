@@ -54,9 +54,10 @@
   background: var(--app-bg);
   border-bottom: 1px solid var(--app-border);
   padding: 16px 24px;
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
-  justify-content: space-between;
+  gap: 12px;
 }
 
 .site-header::before {
@@ -73,6 +74,7 @@
 
 .site-header-brand {
   position: relative;
+  justify-self: start;
   font-family: var(--font-display);
   font-size: 20px;
   font-weight: 600;
@@ -92,6 +94,7 @@
 
 .site-header-about {
   position: relative;
+  justify-self: end;
   height: 32px;
   padding: 0 16px;
   border-radius: 16px;
@@ -104,6 +107,83 @@
 }
 
 .site-header-about:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
+}
+
+/* Collapsed entry point for the top-tracked sidebar on small screens.
+   Hidden by default; shown only under the phone breakpoint, where the
+   sidebar itself is hidden in favor of this + the modal below. */
+.site-header-top-tracked {
+  display: none;
+  justify-self: center;
+  align-items: center;
+  gap: 6px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 16px;
+  border: none;
+  background: var(--app-accent);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.site-header-top-tracked:hover {
+  opacity: 0.9;
+}
+
+/* ── Top-tracked modal (mobile) ─────────────────────────────────── */
+.top-tracked-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 8, 16, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.top-tracked-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
+  border-bottom: none;
+  border-radius: 16px 16px 0 0;
+  padding: 44px 20px 20px;
+}
+
+.top-tracked-modal .top-tracked-card {
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.top-tracked-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.top-tracked-modal-close:hover {
   border-color: var(--app-accent);
   color: var(--app-accent);
 }
@@ -253,6 +333,34 @@
 @media (prefers-reduced-motion: reduce) {
   .search-background {
     display: none;
+  }
+}
+
+/* ── Top-tracked sidebar ─────────────────────────────────────────
+   Fixed to the left of the (untouched, still centered) search
+   column on wide viewports. Below the breakpoint there isn't room
+   for it beside the column without crowding, so it drops into
+   normal flow and renders under the search page instead. ────────── */
+.search-sidebar {
+  position: fixed;
+  z-index: 5;
+  top: 96px;
+  left: calc(50vw - 672px);
+  width: 300px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+@media (max-width: 1400px) {
+  .search-sidebar {
+    position: static;
+    top: auto;
+    left: auto;
+    width: 100%;
+    max-width: 680px;
+    max-height: none;
+    overflow-y: visible;
+    margin: 0 auto 4rem;
   }
 }
 
@@ -766,6 +874,108 @@
   cursor: default;
 }
 
+/* ── Top tracked ─────────────────────────────────────────────── */
+.top-tracked-card {
+  border: 1px solid var(--app-border);
+  border-radius: 12px;
+  background: var(--app-surface);
+  padding: 20px;
+}
+
+.top-tracked-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--app-accent);
+  margin-bottom: 14px;
+}
+
+.top-tracked-title {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--app-text);
+}
+
+.top-tracked-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 0;
+  color: var(--app-text-muted);
+  font-size: 13px;
+  text-align: center;
+}
+
+.top-tracked-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.top-tracked-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  padding: 8px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.top-tracked-row:hover {
+  background: var(--app-surface-hover);
+  border-color: var(--app-border);
+}
+
+.top-tracked-rank {
+  width: 18px;
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-text-muted);
+  text-align: center;
+}
+
+.top-tracked-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.top-tracked-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--app-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-tracked-sub {
+  font-size: 11px;
+  color: var(--app-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.top-tracked-hits {
+  flex-shrink: 0;
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--app-accent);
+}
+
 /* ── Responsive ──────────────────────────────────────────────── */
 
 /* Tablet (iPad portrait and similar) */
@@ -779,6 +989,12 @@
 @media (max-width: 640px) {
   .search-page {
     padding: 2.25rem 16px 3rem;
+  }
+  .search-sidebar {
+    display: none;
+  }
+  .site-header-top-tracked {
+    display: inline-flex;
   }
   .detail-page {
     padding: 2rem 16px 3rem;

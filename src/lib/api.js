@@ -5,7 +5,7 @@
 // URL is available, set VITE_API_BASE_URL and these functions will call it
 // directly, and no call sites need to change.
 
-import { mockSearch, mockGetObject, mockGetAudit } from './mockData';
+import { mockSearch, mockGetObject, mockGetAudit, mockGetTopTracked } from './mockData';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL;
 
@@ -41,4 +41,14 @@ export async function getObjectAudit(noradId) {
     return res.json();
   }
   return withLatency(mockGetAudit(noradId));
+}
+
+export async function getTopTracked(n = 10) {
+  if (API_BASE) {
+    const params = new URLSearchParams({ n });
+    const res = await fetch(`${API_BASE}/objects/top?${params}`);
+    if (!res.ok) throw new Error(`Top tracked lookup failed (${res.status})`);
+    return res.json();
+  }
+  return withLatency(mockGetTopTracked(n));
 }

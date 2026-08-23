@@ -5,6 +5,7 @@ import TypeIcon from '../components/TypeIcon';
 import FeedbackForm from '../components/FeedbackForm';
 import Spinner from '../components/Spinner';
 import SearchBackground from '../components/SearchBackground';
+import TopTracked from '../components/TopTracked';
 import { searchObjects } from '../lib/api';
 import { formatRelativeTime, TYPE_LABELS } from '../lib/format';
 
@@ -51,120 +52,126 @@ export default function SearchPage() {
   }, [query, type]);
 
   return (
-    <div className="search-page">
-      <SearchBackground />
-      <header className="search-header">
-        <div className="wordmark"><span className="brand-v">V</span>itale</div>
-        <p className="search-subtitle">Orbital object search &amp; audit history</p>
-      </header>
+    <>
+      <div className="search-page">
+        <SearchBackground />
+        <header className="search-header">
+          <div className="wordmark"><span className="brand-v">V</span>itale</div>
+          <p className="search-subtitle">Orbital object search &amp; audit history</p>
+        </header>
 
-      <div className="search-input-wrap">
-        {loading ? (
-          <Spinner size={18} className="search-input-icon" />
-        ) : (
-          <Search className="search-input-icon" size={18} strokeWidth={2} />
-        )}
-        <input
-          className="search-input"
-          type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder="Search by name, NORAD ID, or COSPAR ID"
-          autoFocus
-        />
-      </div>
+        <div className="search-input-wrap">
+          {loading ? (
+            <Spinner size={18} className="search-input-icon" />
+          ) : (
+            <Search className="search-input-icon" size={18} strokeWidth={2} />
+          )}
+          <input
+            className="search-input"
+            type="text"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search by name, NORAD ID, or COSPAR ID"
+            autoFocus
+          />
+        </div>
 
-      <div className="filter-pills">
-        {FILTERS.map((f) => (
-          <button
-            key={f.key}
-            className={`filter-pill${type === f.key ? ' filter-pill--active' : ''}`}
-            onClick={() => setType(f.key)}
-            type="button"
-          >
-            {f.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="search-results">
-        {!hasSearched && !loading && (
-          <div className="search-state search-state--empty">
-            Start typing to search the orbital catalog.
-          </div>
-        )}
-
-        {!hasSearched && loading && (
-          <div className="search-state search-state--loading">
-            <Spinner size={16} />
-            Searching…
-          </div>
-        )}
-
-        {hasSearched && (
-          <div className="results-count">
-            {results.length} {results.length === 1 ? 'result' : 'results'}
-          </div>
-        )}
-
-        {hasSearched && !loading && results.length === 0 && (
-          <div className="search-state search-state--no-results">
-            No objects match “{query}”.
-          </div>
-        )}
-
-        <div className="results-list">
-          {results.map((obj) => (
+        <div className="filter-pills">
+          {FILTERS.map((f) => (
             <button
-              key={obj.noradId}
+              key={f.key}
+              className={`filter-pill${type === f.key ? ' filter-pill--active' : ''}`}
+              onClick={() => setType(f.key)}
               type="button"
-              className="result-row"
-              onClick={() => navigate(`/objects/${obj.noradId}`)}
             >
-              <TypeIcon type={obj.type} />
-              <div className="result-row-main">
-                <div className="result-row-name">{obj.name}</div>
-                <div className="result-row-sub">
-                  NORAD {obj.noradId} · {obj.country} · Epoch {formatRelativeTime(obj.epoch)}
-                </div>
-              </div>
-              <span className="type-badge">{TYPE_LABELS[obj.type] || obj.type}</span>
-              <ChevronRight className="result-row-chevron" size={18} strokeWidth={2} />
+              {f.label}
             </button>
           ))}
         </div>
-      </div>
 
-      <div className="info-sections">
-        <section className="info-section" id="how-it-works">
-          <h2 className="info-heading">How search works</h2>
-          <p className="info-body">
-            Search matches against object name, NORAD catalog ID, or COSPAR ID. Orbital
-            parameters and epoch are refreshed from Space-Track two-line element sets, and
-            audit history captures every catalog update, maneuver, and conjunction screening
-            result recorded for the object.
-          </p>
-        </section>
+        <div className="search-results">
+          {!hasSearched && !loading && (
+            <div className="search-state search-state--empty">
+              Start typing to search the orbital catalog.
+            </div>
+          )}
 
-        <section className="info-section" id="about">
-          <h2 className="info-heading">About Vitale</h2>
-          <p className="info-body">
-            Vitale continuously monitors orbital object history, including
-            deviations, maneuvers, and catalog changes, so operators and regulators have
-            a standing record for FCC and ITU compliance reporting.
-          </p>
-        </section>
+          {!hasSearched && loading && (
+            <div className="search-state search-state--loading">
+              <Spinner size={16} />
+              Searching…
+            </div>
+          )}
 
-        <section className="info-section" id="feedback">
-          <div className="feedback-card">
-            <h2 className="info-heading">Suggest an improvement</h2>
-            <p className="info-body">
-              Something missing, or a search that did not behave? Let us know.
-            </p>
-            <FeedbackForm />
+          {hasSearched && (
+            <div className="results-count">
+              {results.length} {results.length === 1 ? 'result' : 'results'}
+            </div>
+          )}
+
+          {hasSearched && !loading && results.length === 0 && (
+            <div className="search-state search-state--no-results">
+              No objects match “{query}”.
+            </div>
+          )}
+
+          <div className="results-list">
+            {results.map((obj) => (
+              <button
+                key={obj.noradId}
+                type="button"
+                className="result-row"
+                onClick={() => navigate(`/objects/${obj.noradId}`)}
+              >
+                <TypeIcon type={obj.type} />
+                <div className="result-row-main">
+                  <div className="result-row-name">{obj.name}</div>
+                  <div className="result-row-sub">
+                    NORAD {obj.noradId} · {obj.country} · Epoch {formatRelativeTime(obj.epoch)}
+                  </div>
+                </div>
+                <span className="type-badge">{TYPE_LABELS[obj.type] || obj.type}</span>
+                <ChevronRight className="result-row-chevron" size={18} strokeWidth={2} />
+              </button>
+            ))}
           </div>
-        </section>
+        </div>
+
+        <div className="info-sections">
+          <section className="info-section" id="how-it-works">
+            <h2 className="info-heading">How search works</h2>
+            <p className="info-body">
+              Search matches against object name, NORAD catalog ID, or COSPAR ID. Orbital
+              parameters and epoch are refreshed from Space-Track two-line element sets, and
+              audit history captures every catalog update, maneuver, and conjunction screening
+              result recorded for the object.
+            </p>
+          </section>
+
+          <section className="info-section" id="about">
+            <h2 className="info-heading">About Vitale</h2>
+            <p className="info-body">
+              Vitale continuously monitors orbital object history, including
+              deviations, maneuvers, and catalog changes, so operators and regulators have
+              a standing record for FCC and ITU compliance reporting.
+            </p>
+          </section>
+
+          <section className="info-section" id="feedback">
+            <div className="feedback-card">
+              <h2 className="info-heading">Suggest an improvement</h2>
+              <p className="info-body">
+                Something missing, or a search that did not behave? Let us know.
+              </p>
+              <FeedbackForm />
+            </div>
+          </section>
+        </div>
       </div>
-    </div>
+
+      <aside className="search-sidebar">
+        <TopTracked limit={10} />
+      </aside>
+    </>
   );
 }

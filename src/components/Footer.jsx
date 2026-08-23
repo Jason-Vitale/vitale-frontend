@@ -22,7 +22,7 @@ export default function Footer() {
         Back to search
       </Link>
       <div className="site-footer-right">
-        © {year} Vitale · Built in New York
+        © {year} Vitale · Built in New York, New York
       </div>
     </footer>
   );

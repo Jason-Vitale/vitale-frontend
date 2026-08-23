@@ -15,6 +15,7 @@ export const OBJECTS = [
     apogeeKm: 423,
     perigeeKm: 408,
     inclinationDeg: 51.64,
+    hits: 15420,
   },
   {
     noradId: 58341,
@@ -26,6 +27,7 @@ export const OBJECTS = [
     apogeeKm: 531,
     perigeeKm: 519,
     inclinationDeg: 97.4,
+    hits: 3210,
   },
   {
     noradId: 59102,
@@ -37,6 +39,7 @@ export const OBJECTS = [
     apogeeKm: 515,
     perigeeKm: 508,
     inclinationDeg: 98.1,
+    hits: 2870,
   },
   {
     noradId: 43013,
@@ -48,6 +51,7 @@ export const OBJECTS = [
     apogeeKm: 720,
     perigeeKm: 210,
     inclinationDeg: 53.0,
+    hits: 4590,
   },
   {
     noradId: 37820,
@@ -59,6 +63,7 @@ export const OBJECTS = [
     apogeeKm: 802,
     perigeeKm: 764,
     inclinationDeg: 98.6,
+    hits: 1200,
   },
   {
     noradId: 48274,
@@ -70,6 +75,7 @@ export const OBJECTS = [
     apogeeKm: 3412,
     perigeeKm: 189,
     inclinationDeg: 98.8,
+    hits: 980,
   },
   {
     noradId: 33765,
@@ -81,6 +87,7 @@ export const OBJECTS = [
     apogeeKm: 1140,
     perigeeKm: 664,
     inclinationDeg: 74.0,
+    hits: 1450,
   },
   {
     noradId: 60447,
@@ -92,6 +99,7 @@ export const OBJECTS = [
     apogeeKm: 544,
     perigeeKm: 536,
     inclinationDeg: 53.0,
+    hits: 2100,
   },
   {
     noradId: 39634,
@@ -103,6 +111,7 @@ export const OBJECTS = [
     apogeeKm: 690,
     perigeeKm: 655,
     inclinationDeg: 97.9,
+    hits: 760,
   },
   {
     noradId: 61883,
@@ -114,6 +123,7 @@ export const OBJECTS = [
     apogeeKm: 522,
     perigeeKm: 514,
     inclinationDeg: 97.8,
+    hits: 1890,
   },
 ];
 
@@ -161,4 +171,9 @@ export function mockGetObject(noradId) {
 
 export function mockGetAudit(noradId) {
   return { events: AUDIT_EVENTS[noradId] || [] };
+}
+
+export function mockGetTopTracked(n = 10) {
+  const results = [...OBJECTS].sort((a, b) => b.hits - a.hits).slice(0, n);
+  return { results };
 }
