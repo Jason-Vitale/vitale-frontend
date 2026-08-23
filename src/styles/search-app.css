@@ -442,6 +442,20 @@
   flex-shrink: 0;
 }
 
+.filter-expand {
+  display: block;
+  border: none;
+  background: transparent;
+  color: var(--app-accent);
+  font-size: 12px;
+  padding: 5px 2px 0;
+  cursor: pointer;
+}
+
+.filter-expand:hover {
+  text-decoration: underline;
+}
+
 /* ── Filter trigger + modal (below the wide breakpoint) ─────────── */
 .filter-trigger-row {
   display: flex;

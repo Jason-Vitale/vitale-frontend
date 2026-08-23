@@ -1,7 +1,8 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { TYPE_LABELS, LAUNCH_WINDOWS, launchWindowKey } from '../lib/format';
 
 const TYPE_ORDER = ['payload', 'rocket-body', 'debris', 'unknown'];
+const COUNTRY_VISIBLE_COUNT = 7;
 
 // Facet options + counts are derived from the current (unfiltered) result
 // set, Amazon-style -- only values actually present are shown, each with
@@ -38,12 +39,17 @@ function useFacets(results) {
   }, [results]);
 }
 
-function FilterGroup({ heading, options, selected, onToggle }) {
+function FilterGroup({ heading, options, selected, onToggle, truncateAt }) {
+  const [expanded, setExpanded] = useState(false);
   if (options.length === 0) return null;
+
+  const showToggle = Boolean(truncateAt) && options.length > truncateAt;
+  const visible = showToggle && !expanded ? options.slice(0, truncateAt) : options;
+
   return (
     <div className="filter-group">
       <div className="filter-group-heading">{heading}</div>
-      {options.map((opt) => (
+      {visible.map((opt) => (
         <label key={opt.key} className="filter-option">
           <input
             type="checkbox"
@@ -54,6 +60,11 @@ function FilterGroup({ heading, options, selected, onToggle }) {
           <span className="filter-option-count">{opt.count}</span>
         </label>
       ))}
+      {showToggle && (
+        <button type="button" className="filter-expand" onClick={() => setExpanded((e) => !e)}>
+          {expanded ? 'Show less' : `+ ${options.length - truncateAt} more`}
+        </button>
+      )}
     </div>
   );
 }
@@ -92,6 +103,7 @@ export default function FilterPanel({
         options={countries}
         selected={selectedCountries}
         onToggle={onToggleCountry}
+        truncateAt={COUNTRY_VISIBLE_COUNT}
       />
       <FilterGroup
         heading="Launched"

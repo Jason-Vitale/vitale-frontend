@@ -20,7 +20,7 @@ function toggleInSet(set, key) {
 // Filters run against the full browse/search set, but rendering every match
 // as a DOM row doesn't scale once that set is the whole catalog -- cap what
 // actually paints and tell people to narrow further for the rest.
-const MAX_RENDERED_RESULTS = 200;
+const MAX_RENDERED_RESULTS = 15;
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
