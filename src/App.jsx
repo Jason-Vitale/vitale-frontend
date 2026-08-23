@@ -1,31 +1,24 @@
-import Nav from './components/Nav';
-import Hero from './components/Hero';
-import StatsBar from './components/StatsBar';
-import OrbitalTracker from './components/OrbitalTracker';
-import Platform from './components/Platform';
-import FCCIngest from './components/FCCIngest';
-import ComplianceMatrix from './components/ComplianceMatrix';
-import AuditFeed from './components/AuditFeed';
-import Enterprise from './components/Enterprise';
-import HowItWorks from './components/HowItWorks';
-import CTA from './components/CTA';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Header from './components/Header';
 import Footer from './components/Footer';
+import BackToTop from './components/BackToTop';
+import SearchPage from './pages/SearchPage';
+import ObjectDetailPage from './pages/ObjectDetailPage';
 
 export default function App() {
   return (
-    <>
-      <Nav />
-      <Hero />
-      <StatsBar />
-      <OrbitalTracker />
-      <Platform />
-      <FCCIngest />
-      <ComplianceMatrix />
-      <AuditFeed />
-      <Enterprise />
-      <HowItWorks />
-      <CTA />
-      <Footer />
-    </>
+    <BrowserRouter>
+      <div className="app-shell">
+        <Header />
+        <main className="app-main">
+          <Routes>
+            <Route path="/" element={<SearchPage />} />
+            <Route path="/objects/:noradId" element={<ObjectDetailPage />} />
+          </Routes>
+        </main>
+        <Footer />
+        <BackToTop />
+      </div>
+    </BrowserRouter>
   );
 }
