@@ -152,3 +152,46 @@ export async function getStats() {
   const data = await parseJsonResponse(res);
   return { trackedObjects: data.tracked_objects };
 }
+
+// The full catalog only refreshes ~once/day server-side, so it's cached in
+// localStorage for a day too -- most page loads should skip the network
+// entirely instead of re-downloading the whole thing on every visit.
+const CATALOG_CACHE_KEY = 'vitale.catalog.v1';
+const CATALOG_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
+function readCatalogCache() {
+  try {
+    const raw = localStorage.getItem(CATALOG_CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed?.fetchedAt || !Array.isArray(parsed.objects)) return null;
+    if (Date.now() - parsed.fetchedAt > CATALOG_CACHE_TTL_MS) return null;
+    return parsed.objects;
+  } catch {
+    return null;
+  }
+}
+
+function writeCatalogCache(objects) {
+  try {
+    localStorage.setItem(CATALOG_CACHE_KEY, JSON.stringify({ fetchedAt: Date.now(), objects }));
+  } catch {
+    // Storage full or unavailable (private browsing, quota) -- caching is an
+    // optimization, not a requirement, so it fails silently.
+  }
+}
+
+// Full catalog listing (see /objects/catalog spec) for browsing/filtering
+// before a search query is typed. Callers should fall back to
+// getTopTracked() if this rejects, since the endpoint may not exist yet.
+export async function getCatalog({ forceRefresh = false } = {}) {
+  if (!forceRefresh) {
+    const cached = readCatalogCache();
+    if (cached) return { results: cached, fromCache: true };
+  }
+  const res = await safeFetch(`${API_BASE}/objects/catalog`);
+  const data = await parseJsonResponse(res);
+  const results = (data.objects || []).map(normalizeObject);
+  writeCatalogCache(results);
+  return { results, fromCache: false };
+}

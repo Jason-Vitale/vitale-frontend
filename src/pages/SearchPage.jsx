@@ -7,7 +7,7 @@ import Spinner from '../components/Spinner';
 import SearchBackground from '../components/SearchBackground';
 import TopTracked from '../components/TopTracked';
 import FilterPanel from '../components/FilterPanel';
-import { getStats, getTopTracked, searchObjects } from '../lib/api';
+import { getCatalog, getStats, getTopTracked, searchObjects } from '../lib/api';
 import { formatRelativeTime, launchWindowKey, TYPE_LABELS } from '../lib/format';
 
 function toggleInSet(set, key) {
@@ -16,6 +16,11 @@ function toggleInSet(set, key) {
   else next.add(key);
   return next;
 }
+
+// Filters run against the full browse/search set, but rendering every match
+// as a DOM row doesn't scale once that set is the whole catalog -- cap what
+// actually paints and tell people to narrow further for the rest.
+const MAX_RENDERED_RESULTS = 200;
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
@@ -33,6 +38,7 @@ export default function SearchPage() {
   const [browseResults, setBrowseResults] = useState([]);
   const [browseLoading, setBrowseLoading] = useState(true);
   const [browseError, setBrowseError] = useState(null);
+  const [browseIsFullCatalog, setBrowseIsFullCatalog] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -56,15 +62,25 @@ export default function SearchPage() {
     };
   }, []);
 
-  // No search endpoint exists for "give me everything" -- top-tracked
-  // objects double as a default browsable set, so filters have real data
-  // to work with (and the panel is usable) before anyone types a query.
+  // Default browsable set so the filter panel has real data (and is usable)
+  // before anyone types a query. Prefers the full catalog -- cached in
+  // localStorage for a day, since it only changes that often server-side --
+  // and falls back to the top-tracked list if that endpoint isn't live yet.
   useEffect(() => {
     let cancelled = false;
-    getTopTracked(40)
+    getCatalog()
       .then((data) => {
-        if (!cancelled) setBrowseResults(data.results);
+        if (cancelled) return;
+        setBrowseResults(data.results);
+        setBrowseIsFullCatalog(true);
       })
+      .catch(() =>
+        getTopTracked(40).then((data) => {
+          if (cancelled) return;
+          setBrowseResults(data.results);
+          setBrowseIsFullCatalog(false);
+        })
+      )
       .catch((err) => {
         if (!cancelled) setBrowseError(err.message || 'Could not load the catalog to browse.');
       })
@@ -129,6 +145,8 @@ export default function SearchPage() {
   }, [baseResults, selectedTypes, selectedCountries, selectedWindows]);
 
   const filterCount = selectedTypes.size + selectedCountries.size + selectedWindows.size;
+  const renderedResults = filteredResults.slice(0, MAX_RENDERED_RESULTS);
+  const isRenderTruncated = filteredResults.length > MAX_RENDERED_RESULTS;
 
   const clearFilters = () => {
     setSelectedTypes(new Set());
@@ -202,9 +220,14 @@ export default function SearchPage() {
 
           {isBrowsing && !browseLoading && browseResults.length > 0 && (
             <div className="results-count">
-              {filterCount > 0
-                ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} top tracked objects shown`
-                : `Showing ${browseResults.length.toLocaleString()} top tracked objects · search above for something specific`}
+              {browseIsFullCatalog
+                ? filterCount > 0
+                  ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} catalog objects match`
+                  : `${browseResults.length.toLocaleString()} objects in the catalog · filter to narrow, or search above`
+                : filterCount > 0
+                  ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} top tracked objects shown`
+                  : `Showing ${browseResults.length.toLocaleString()} top tracked objects · search above for something specific`}
+              {isRenderTruncated ? ` · showing first ${MAX_RENDERED_RESULTS}` : ''}
             </div>
           )}
 
@@ -232,6 +255,7 @@ export default function SearchPage() {
                 : filterCount > 0
                   ? `${filteredResults.length.toLocaleString()} of ${totalMatches.toLocaleString()} results shown`
                   : `${totalMatches.toLocaleString()} ${totalMatches === 1 ? 'result' : 'results'}`}
+              {isRenderTruncated ? ` · showing first ${MAX_RENDERED_RESULTS}` : ''}
             </div>
           )}
 
@@ -248,7 +272,7 @@ export default function SearchPage() {
           )}
 
           <div className="results-list">
-            {filteredResults.map((obj) => {
+            {renderedResults.map((obj) => {
               const subParts = [
                 `NORAD ${obj.noradId}`,
                 obj.country,
