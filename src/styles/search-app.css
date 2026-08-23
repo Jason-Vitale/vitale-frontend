@@ -136,6 +136,24 @@
   color: var(--app-accent);
 }
 
+/* Absolutely positioned (rather than relying on flex distribution) so it
+   sits at the true page center regardless of how wide the brand and
+   actions on either side happen to be. */
+.site-header-tagline {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .brand-v {
   width: auto;
   height: 1em;
@@ -481,6 +499,12 @@
 
 .bg-dot {
   opacity: 0.24;
+  animation: bg-dot-pulse 3.5s ease-in-out infinite;
+}
+
+@keyframes bg-dot-pulse {
+  0%, 100% { opacity: 0.14; }
+  50% { opacity: 0.34; }
 }
 
 .bg-orbit {
@@ -488,6 +512,32 @@
   stroke: var(--app-border);
   stroke-width: 1;
   stroke-dasharray: 2 4;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.bg-orbit-1 {
+  animation: bg-orbit-rotate 90s linear infinite;
+}
+
+.bg-orbit-2 {
+  animation: bg-orbit-rotate-reverse 110s linear infinite;
+}
+
+@keyframes bg-orbit-rotate {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes bg-orbit-rotate-reverse {
+  to { transform: rotate(-360deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bg-dot,
+  .bg-orbit-1,
+  .bg-orbit-2 {
+    animation: none;
+  }
 }
 
 /* ── Top-tracked sidebar ─────────────────────────────────────────
@@ -1387,6 +1437,9 @@
 @media (max-width: 900px) {
   .search-page {
     padding-top: 2.75rem;
+  }
+  .site-header-tagline {
+    display: none;
   }
 }
 

@@ -78,6 +78,8 @@ export default function Header() {
           <Wordmark />
         </Link>
 
+        <span className="site-header-tagline">Orbital Auditing</span>
+
         <div className="site-header-actions">
           <button type="button" className="site-header-about" onClick={handleSectionLink('about')}>
             About
