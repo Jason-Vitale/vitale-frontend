@@ -4,16 +4,14 @@ export default function Nav() {
 
   return (
     <nav>
-      <div className="nav-logo" onClick={() => scrollTo('top')}>
-        <span className="nav-logo-mark">V</span>itale
-      </div>
+      <div className="nav-logo">VITALE AEROSPACE</div>
       <ul className="nav-links">
-        <li><a onClick={() => scrollTo('product')}>Product</a></li>
-        <li><a onClick={() => scrollTo('regulations')}>Regulations</a></li>
-        <li><a onClick={() => scrollTo('company')}>Company</a></li>
+        <li><a href="#platform">Platform</a></li>
+        <li><a href="#enterprise">Enterprise</a></li>
+        <li><a href="#how">How It Works</a></li>
       </ul>
-      <button className="nav-cta" onClick={() => scrollTo('access')}>
-        Request access
+      <button className="nav-cta" onClick={() => scrollTo('demo')}>
+        Request Demo
       </button>
     </nav>
   );
