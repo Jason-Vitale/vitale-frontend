@@ -348,21 +348,24 @@ export default function SearchPage() {
         <TopTracked limit={10} />
       </aside>
 
-      {filtersOpen && (
-        <div className="filter-modal-backdrop" onClick={() => setFiltersOpen(false)}>
-          <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="filter-modal-close"
-              onClick={() => setFiltersOpen(false)}
-              aria-label="Close"
-            >
-              <X size={18} strokeWidth={2} />
-            </button>
-            <FilterPanel {...filterPanelProps} />
-          </div>
+      {/* Always mounted so the open/close state can animate via the is-open
+          class instead of popping in and out of the DOM instantly. */}
+      <div
+        className={`filter-modal-backdrop${filtersOpen ? ' is-open' : ''}`}
+        onClick={() => setFiltersOpen(false)}
+      >
+        <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className="filter-modal-close"
+            onClick={() => setFiltersOpen(false)}
+            aria-label="Close"
+          >
+            <X size={18} strokeWidth={2} />
+          </button>
+          <FilterPanel {...filterPanelProps} />
         </div>
-      )}
+      </div>
     </>
   );
 }

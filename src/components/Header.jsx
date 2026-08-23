@@ -97,48 +97,54 @@ export default function Header() {
           <Menu size={20} strokeWidth={2} />
         </button>
 
-        {menuOpen && (
-          <>
-            {/* Nested inside <header> (rather than a sibling) so it shares the
-                header's stacking context and sits behind .site-header-menu --
-                as a sibling of <header>, its higher z-index would otherwise
-                cover the whole header and swallow clicks meant for the menu
-                items themselves. */}
-            <div className="site-header-menu-backdrop" onClick={() => setMenuOpen(false)} />
-            <div className="site-header-menu">
-              <button type="button" className="site-header-menu-item" onClick={handleTopTrackedClick}>
-                Top tracked
-              </button>
-              <button type="button" className="site-header-menu-item" onClick={handleSectionLink('about')}>
-                About
-              </button>
-              <button
-                type="button"
-                className="site-header-menu-item site-header-menu-item--contact"
-                onClick={handleSectionLink('feedback')}
-              >
-                Contact us
-              </button>
-            </div>
-          </>
-        )}
+        {/* Backdrop + menu are always mounted (rather than conditionally
+            rendered) and animate via the is-open class instead -- popping
+            the whole thing in and out of the DOM gives no chance for a CSS
+            transition to run. Nested inside <header> so it shares the
+            header's stacking context and sits behind .site-header-menu --
+            as a sibling of <header>, its higher z-index would otherwise
+            cover the whole header and swallow clicks meant for the menu
+            items themselves. */}
+        <div
+          className={`site-header-menu-backdrop${menuOpen ? ' is-open' : ''}`}
+          onClick={() => setMenuOpen(false)}
+        />
+        <div className={`site-header-menu${menuOpen ? ' is-open' : ''}`} aria-hidden={!menuOpen}>
+          <button type="button" className="site-header-menu-item" onClick={handleTopTrackedClick}>
+            Top tracked
+          </button>
+          <button type="button" className="site-header-menu-item" onClick={handleSectionLink('about')}>
+            About
+          </button>
+          <button
+            type="button"
+            className="site-header-menu-item site-header-menu-item--contact"
+            onClick={handleSectionLink('feedback')}
+          >
+            Contact us
+          </button>
+        </div>
       </header>
 
-      {topTrackedOpen && (
-        <div className="top-tracked-modal-backdrop" onClick={() => setTopTrackedOpen(false)}>
-          <div className="top-tracked-modal" onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              className="top-tracked-modal-close"
-              onClick={() => setTopTrackedOpen(false)}
-              aria-label="Close"
-            >
-              <X size={18} strokeWidth={2} />
-            </button>
-            <TopTracked limit={10} onSelect={() => setTopTrackedOpen(false)} />
-          </div>
+      <div
+        className={`top-tracked-modal-backdrop${topTrackedOpen ? ' is-open' : ''}`}
+        onClick={() => setTopTrackedOpen(false)}
+      >
+        <div className="top-tracked-modal" onClick={(e) => e.stopPropagation()}>
+          <button
+            type="button"
+            className="top-tracked-modal-close"
+            onClick={() => setTopTrackedOpen(false)}
+            aria-label="Close"
+          >
+            <X size={18} strokeWidth={2} />
+          </button>
+          {/* Only mounted while open -- avoids an extra fetch on every page
+              load now that the modal shell itself is always mounted for
+              the transition to animate. */}
+          {topTrackedOpen && <TopTracked limit={10} onSelect={() => setTopTrackedOpen(false)} />}
         </div>
-      )}
+      </div>
     </>
   );
 }

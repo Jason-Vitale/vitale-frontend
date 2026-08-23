@@ -138,9 +138,17 @@
 
 .brand-v {
   width: auto;
-  height: 2.1em;
-  margin-right: 0.05em;
+  height: 1em;
+  /* BrandMark's viewBox (and so this box's width) is measured off the V
+     path alone -- see getBBox() there -- not the trail/satellite's wider
+     reach. overflow:visible lets those still paint outside this box as a
+     flourish instead of getting clipped by the tighter viewBox, but that
+     means the satellite pokes out past this box's own right edge by
+     roughly 12% of the V's width; the margin below covers that overhang
+     plus a touch more so "itale" clears it instead of sitting on top. */
+  margin-right: 0.2em;
   flex-shrink: 0;
+  overflow: visible;
   color: var(--app-accent);
 }
 
@@ -220,6 +228,17 @@
   position: fixed;
   inset: 0;
   z-index: 24;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.16s ease, visibility 0s linear 0.16s;
+}
+
+.site-header-menu-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.16s ease;
 }
 
 .site-header-menu {
@@ -235,7 +254,21 @@
   border-radius: 4px;
   background: var(--app-bg);
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translateY(-6px) scale(0.98);
+  transform-origin: top right;
+  transition: opacity 0.16s ease, transform 0.16s ease, visibility 0s linear 0.16s;
   overflow: hidden;
+}
+
+.site-header-menu.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transform: translateY(0) scale(1);
+  transition: opacity 0.16s ease, transform 0.16s ease;
 }
 
 .site-header-menu-item {
@@ -268,6 +301,17 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.top-tracked-modal-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
 }
 
 .top-tracked-modal {
@@ -281,6 +325,12 @@
   border-bottom: none;
   border-radius: 4px 4px 0 0;
   padding: 44px 20px 20px;
+  transform: translateY(100%);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.top-tracked-modal-backdrop.is-open .top-tracked-modal {
+  transform: translateY(0);
 }
 
 .top-tracked-modal .top-tracked-card {
@@ -646,6 +696,17 @@
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transition: opacity 0.2s ease, visibility 0s linear 0.2s;
+}
+
+.filter-modal-backdrop.is-open {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+  transition: opacity 0.2s ease;
 }
 
 .filter-modal {
@@ -659,6 +720,12 @@
   border-bottom: none;
   border-radius: 4px 4px 0 0;
   padding: 44px 20px 20px;
+  transform: translateY(100%);
+  transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.filter-modal-backdrop.is-open .filter-modal {
+  transform: translateY(0);
 }
 
 .filter-modal-close {
@@ -1318,8 +1385,30 @@
 
 /* Phones */
 @media (max-width: 640px) {
+  .site-header-brand {
+    font-size: 1.3rem;
+  }
   .search-page {
     padding: 2.25rem 16px 3rem;
+  }
+  .wordmark {
+    font-size: 2.5rem;
+  }
+  .search-subtitle {
+    font-size: 12px;
+  }
+  .tracked-stat {
+    font-size: 11px;
+  }
+  .search-input {
+    height: 48px;
+    font-size: 14px;
+  }
+  .info-heading {
+    font-size: 17px;
+  }
+  .info-body {
+    font-size: 14px;
   }
   .search-sidebar {
     display: none;
@@ -1384,8 +1473,11 @@
 
 /* Small phones */
 @media (max-width: 380px) {
+  .site-header-brand {
+    font-size: 1.1rem;
+  }
   .wordmark {
-    font-size: 2.25rem;
+    font-size: 2rem;
   }
   .metric-grid {
     grid-template-columns: 1fr 1fr;
