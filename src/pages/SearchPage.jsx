@@ -23,6 +23,8 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(null);
+  const [rawCount, setRawCount] = useState(0);
+  const [totalMatches, setTotalMatches] = useState(0);
   const [trackedObjects, setTrackedObjects] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -54,6 +56,8 @@ export default function SearchPage() {
       setHasSearched(false);
       setLoading(false);
       setError(null);
+      setRawCount(0);
+      setTotalMatches(0);
       return;
     }
     setLoading(true);
@@ -62,12 +66,16 @@ export default function SearchPage() {
       searchObjects({ q: trimmed, type })
         .then((data) => {
           setResults(data.results);
+          setRawCount(data.rawCount);
+          setTotalMatches(data.totalMatches);
           setHasSearched(true);
         })
         .catch((err) => {
           setError(err.message || 'Search failed. Try again.');
           setResults([]);
           setHasSearched(false);
+          setRawCount(0);
+          setTotalMatches(0);
         })
         .finally(() => setLoading(false));
     }, 280);
@@ -136,9 +144,11 @@ export default function SearchPage() {
             <div className="search-state search-state--no-results">{error}</div>
           )}
 
-          {hasSearched && (
+          {hasSearched && totalMatches > 0 && (
             <div className="results-count">
-              {results.length} {results.length === 1 ? 'result' : 'results'}
+              {rawCount < totalMatches
+                ? `Showing ${rawCount} of ${totalMatches.toLocaleString()} results · keep typing to narrow`
+                : `${totalMatches.toLocaleString()} ${totalMatches === 1 ? 'result' : 'results'}`}
             </div>
           )}
 

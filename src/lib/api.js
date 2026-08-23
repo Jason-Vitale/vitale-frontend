@@ -106,18 +106,27 @@ function normalizeAuditEvent(raw) {
 
 export async function searchObjects({ q = '', type = 'all' } = {}) {
   const trimmed = q.trim();
-  if (!trimmed) return { results: [], count: 0 };
+  if (!trimmed) return { results: [], count: 0, rawCount: 0, totalMatches: 0 };
 
   const params = new URLSearchParams({ q: trimmed });
   const res = await safeFetch(`${API_BASE}/objects/search?${params}`);
   const data = await parseJsonResponse(res);
 
-  let results = (data.objects || []).map(normalizeObject);
+  const rawObjects = data.objects || [];
+  let results = rawObjects.map(normalizeObject);
   // The search endpoint has no type filter server-side, so it's applied here.
+  // rawCount/totalMatches deliberately reflect the unfiltered response --
+  // they describe server-side truncation, independent of this client-side
+  // narrowing.
   if (type !== 'all') {
     results = results.filter((obj) => obj.type === type);
   }
-  return { results, count: results.length };
+  return {
+    results,
+    count: results.length,
+    rawCount: rawObjects.length,
+    totalMatches: data.total_matches ?? rawObjects.length,
+  };
 }
 
 export async function getObject(noradId) {
