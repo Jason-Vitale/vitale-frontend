@@ -1,24 +1,28 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, ChevronRight } from 'lucide-react';
+import { Search, ChevronRight, X } from 'lucide-react';
 import TypeIcon from '../components/TypeIcon';
 import FeedbackForm from '../components/FeedbackForm';
 import Spinner from '../components/Spinner';
 import SearchBackground from '../components/SearchBackground';
 import TopTracked from '../components/TopTracked';
-import { getStats, searchObjects } from '../lib/api';
-import { formatRelativeTime, TYPE_LABELS } from '../lib/format';
+import FilterPanel from '../components/FilterPanel';
+import { getStats, getTopTracked, searchObjects } from '../lib/api';
+import { formatRelativeTime, launchWindowKey, TYPE_LABELS } from '../lib/format';
 
-const FILTERS = [
-  { key: 'all', label: 'All types' },
-  { key: 'payload', label: 'Payload' },
-  { key: 'rocket-body', label: 'Rocket body' },
-  { key: 'debris', label: 'Debris' },
-];
+function toggleInSet(set, key) {
+  const next = new Set(set);
+  if (next.has(key)) next.delete(key);
+  else next.add(key);
+  return next;
+}
 
 export default function SearchPage() {
   const [query, setQuery] = useState('');
-  const [type, setType] = useState('all');
+  const [selectedTypes, setSelectedTypes] = useState(() => new Set());
+  const [selectedCountries, setSelectedCountries] = useState(() => new Set());
+  const [selectedWindows, setSelectedWindows] = useState(() => new Set());
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
@@ -26,6 +30,9 @@ export default function SearchPage() {
   const [rawCount, setRawCount] = useState(0);
   const [totalMatches, setTotalMatches] = useState(0);
   const [trackedObjects, setTrackedObjects] = useState(null);
+  const [browseResults, setBrowseResults] = useState([]);
+  const [browseLoading, setBrowseLoading] = useState(true);
+  const [browseError, setBrowseError] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -49,6 +56,26 @@ export default function SearchPage() {
     };
   }, []);
 
+  // No search endpoint exists for "give me everything" -- top-tracked
+  // objects double as a default browsable set, so filters have real data
+  // to work with (and the panel is usable) before anyone types a query.
+  useEffect(() => {
+    let cancelled = false;
+    getTopTracked(40)
+      .then((data) => {
+        if (!cancelled) setBrowseResults(data.results);
+      })
+      .catch((err) => {
+        if (!cancelled) setBrowseError(err.message || 'Could not load the catalog to browse.');
+      })
+      .finally(() => {
+        if (!cancelled) setBrowseLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   useEffect(() => {
     const trimmed = query.trim();
     if (!trimmed) {
@@ -63,7 +90,7 @@ export default function SearchPage() {
     setLoading(true);
     setError(null);
     const timer = setTimeout(() => {
-      searchObjects({ q: trimmed, type })
+      searchObjects({ q: trimmed })
         .then((data) => {
           setResults(data.results);
           setRawCount(data.rawCount);
@@ -80,10 +107,52 @@ export default function SearchPage() {
         .finally(() => setLoading(false));
     }, 280);
     return () => clearTimeout(timer);
-  }, [query, type]);
+  }, [query]);
+
+  const isBrowsing = query.trim() === '';
+  // While no query is entered, the filter panel and result list work off
+  // the default browsable set instead of search results.
+  const baseResults = isBrowsing ? browseResults : results;
+
+  // Facet narrowing (type / country / launch window) runs entirely against
+  // the already-fetched result set, independent of the server request above.
+  const filteredResults = useMemo(() => {
+    if (selectedTypes.size === 0 && selectedCountries.size === 0 && selectedWindows.size === 0) {
+      return baseResults;
+    }
+    return baseResults.filter((obj) => {
+      if (selectedTypes.size > 0 && !selectedTypes.has(obj.type)) return false;
+      if (selectedCountries.size > 0 && !selectedCountries.has(obj.country)) return false;
+      if (selectedWindows.size > 0 && !selectedWindows.has(launchWindowKey(obj.launchDate))) return false;
+      return true;
+    });
+  }, [baseResults, selectedTypes, selectedCountries, selectedWindows]);
+
+  const filterCount = selectedTypes.size + selectedCountries.size + selectedWindows.size;
+
+  const clearFilters = () => {
+    setSelectedTypes(new Set());
+    setSelectedCountries(new Set());
+    setSelectedWindows(new Set());
+  };
+
+  const filterPanelProps = {
+    results: baseResults,
+    selectedTypes,
+    selectedCountries,
+    selectedWindows,
+    onToggleType: (key) => setSelectedTypes((s) => toggleInSet(s, key)),
+    onToggleCountry: (key) => setSelectedCountries((s) => toggleInSet(s, key)),
+    onToggleWindow: (key) => setSelectedWindows((s) => toggleInSet(s, key)),
+    onClear: clearFilters,
+  };
 
   return (
     <>
+      <aside className="filter-sidebar">
+        <FilterPanel {...filterPanelProps} />
+      </aside>
+
       <div className="search-page">
         <SearchBackground />
         <header className="search-header">
@@ -113,53 +182,73 @@ export default function SearchPage() {
           />
         </div>
 
-        <div className="filter-pills">
-          {FILTERS.map((f) => (
-            <button
-              key={f.key}
-              className={`filter-pill${type === f.key ? ' filter-pill--active' : ''}`}
-              onClick={() => setType(f.key)}
-              type="button"
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="filter-trigger-row">
+          <button type="button" className="filter-trigger" onClick={() => setFiltersOpen(true)}>
+            Filters{filterCount > 0 ? ` (${filterCount})` : ''}
+          </button>
         </div>
 
         <div className="search-results">
-          {!hasSearched && !loading && !error && (
-            <div className="search-state search-state--empty">
-              Start typing to search the orbital catalog.
+          {isBrowsing && browseLoading && browseResults.length === 0 && (
+            <div className="search-state search-state--loading">
+              <Spinner size={16} />
+              Loading catalog…
             </div>
           )}
 
-          {!hasSearched && loading && (
+          {isBrowsing && browseError && !browseLoading && browseResults.length === 0 && (
+            <div className="search-state search-state--no-results">{browseError}</div>
+          )}
+
+          {isBrowsing && !browseLoading && browseResults.length > 0 && (
+            <div className="results-count">
+              {filterCount > 0
+                ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} top tracked objects shown`
+                : `Showing ${browseResults.length.toLocaleString()} top tracked objects · search above for something specific`}
+            </div>
+          )}
+
+          {isBrowsing && !browseLoading && browseResults.length > 0 && filteredResults.length === 0 && (
+            <div className="search-state search-state--no-results">
+              No results match the selected filters.
+            </div>
+          )}
+
+          {!isBrowsing && !hasSearched && loading && (
             <div className="search-state search-state--loading">
               <Spinner size={16} />
               Searching…
             </div>
           )}
 
-          {error && !loading && (
+          {!isBrowsing && error && !loading && (
             <div className="search-state search-state--no-results">{error}</div>
           )}
 
-          {hasSearched && totalMatches > 0 && (
+          {!isBrowsing && hasSearched && totalMatches > 0 && (
             <div className="results-count">
               {rawCount < totalMatches
                 ? `Showing ${rawCount} of ${totalMatches.toLocaleString()} results · keep typing to narrow`
-                : `${totalMatches.toLocaleString()} ${totalMatches === 1 ? 'result' : 'results'}`}
+                : filterCount > 0
+                  ? `${filteredResults.length.toLocaleString()} of ${totalMatches.toLocaleString()} results shown`
+                  : `${totalMatches.toLocaleString()} ${totalMatches === 1 ? 'result' : 'results'}`}
             </div>
           )}
 
-          {hasSearched && !loading && results.length === 0 && (
+          {!isBrowsing && hasSearched && !loading && results.length === 0 && (
             <div className="search-state search-state--no-results">
               No objects match “{query}”.
             </div>
           )}
 
+          {!isBrowsing && hasSearched && !loading && results.length > 0 && filteredResults.length === 0 && (
+            <div className="search-state search-state--no-results">
+              No results match the selected filters.
+            </div>
+          )}
+
           <div className="results-list">
-            {results.map((obj) => {
+            {filteredResults.map((obj) => {
               const subParts = [
                 `NORAD ${obj.noradId}`,
                 obj.country,
@@ -192,7 +281,9 @@ export default function SearchPage() {
               Search matches against object name, NORAD catalog ID, or COSPAR ID. Catalog
               details are kept current against the Vitale object database, and audit history
               captures every catalog update, maneuver, and conjunction screening result
-              recorded for the object.
+              recorded for the object. Results can be filtered by object type, origin
+              country, and launch window, and are exportable for use in research datasets
+              and third-party reporting.
             </p>
           </section>
 
@@ -200,8 +291,10 @@ export default function SearchPage() {
             <h2 className="info-heading">About Vitale</h2>
             <p className="info-body">
               Vitale continuously monitors orbital object history, including
-              deviations, maneuvers, and catalog changes, so operators and regulators have
-              a standing record for FCC and ITU compliance reporting.
+              deviations, maneuvers, and catalog changes, so operators, regulators, and
+              researchers have a standing record for FCC and ITU compliance reporting,
+              academic and policy research, and independent verification of orbital
+              activity.
             </p>
           </section>
 
@@ -220,6 +313,22 @@ export default function SearchPage() {
       <aside className="search-sidebar">
         <TopTracked limit={10} />
       </aside>
+
+      {filtersOpen && (
+        <div className="filter-modal-backdrop" onClick={() => setFiltersOpen(false)}>
+          <div className="filter-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="filter-modal-close"
+              onClick={() => setFiltersOpen(false)}
+              aria-label="Close"
+            >
+              <X size={18} strokeWidth={2} />
+            </button>
+            <FilterPanel {...filterPanelProps} />
+          </div>
+        </div>
+      )}
     </>
   );
 }

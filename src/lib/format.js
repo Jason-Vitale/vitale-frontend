@@ -44,3 +44,23 @@ export const TYPE_LABELS = {
   debris: 'Debris',
   unknown: 'Unknown',
 };
+
+export const LAUNCH_WINDOWS = [
+  { key: 'last-5', label: 'Last 5 years' },
+  { key: '5-10', label: '5-10 years ago' },
+  { key: '10-20', label: '10-20 years ago' },
+  { key: '20-plus', label: '20+ years ago' },
+  { key: 'unknown', label: 'Unknown' },
+];
+
+// Bucket a launch date into one of LAUNCH_WINDOWS, for faceted filtering.
+export function launchWindowKey(dateString) {
+  if (!dateString) return 'unknown';
+  const d = new Date(dateString);
+  if (Number.isNaN(d.getTime())) return 'unknown';
+  const years = (Date.now() - d.getTime()) / (365.25 * 24 * 60 * 60 * 1000);
+  if (years < 5) return 'last-5';
+  if (years < 10) return '5-10';
+  if (years < 20) return '10-20';
+  return '20-plus';
+}

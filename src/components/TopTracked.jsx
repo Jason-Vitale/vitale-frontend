@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { TrendingUp } from 'lucide-react';
 import TypeIcon from './TypeIcon';
 import Spinner from './Spinner';
 import { getTopTracked } from '../lib/api';
@@ -36,7 +35,6 @@ export default function TopTracked({ limit = 10, title = 'Top tracked objects', 
   return (
     <div className="top-tracked-card">
       <div className="top-tracked-header">
-        <TrendingUp size={16} strokeWidth={2} />
         <h2 className="top-tracked-title">{title}</h2>
       </div>
 

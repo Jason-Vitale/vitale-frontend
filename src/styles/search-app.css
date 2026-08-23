@@ -1,7 +1,7 @@
 /* Dark navy, search-first UI. Scoped under .app-shell so it overrides the
    legacy marketing theme in index.css without touching it. */
 
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap');
 
 .app-shell {
   display: flex;
@@ -11,7 +11,8 @@
   color: var(--app-text);
   font-family: var(--font-body);
   font-weight: 400;
-  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: 'Source Serif 4', Georgia, 'Times New Roman', serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --app-bg: #0a0f1e;
   --app-surface: rgba(255, 255, 255, 0.03);
@@ -60,27 +61,15 @@
   gap: 12px;
 }
 
-.site-header::before {
-  content: '';
-  position: absolute;
-  top: -140px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 560px;
-  height: 220px;
-  background: radial-gradient(ellipse at center, rgba(79, 141, 253, 0.22), transparent 70%);
-  pointer-events: none;
-}
-
 .site-header-brand {
   position: relative;
   justify-self: start;
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
   color: var(--app-text);
   text-decoration: none;
-  letter-spacing: -0.01em;
+  letter-spacing: 0.01em;
   transition: color 0.15s;
 }
 
@@ -95,13 +84,15 @@
 .site-header-about {
   position: relative;
   justify-self: end;
-  height: 32px;
-  padding: 0 16px;
-  border-radius: 16px;
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 3px;
   border: 1px solid var(--app-border);
   background: transparent;
   color: var(--app-text-secondary);
-  font-size: 13px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   cursor: pointer;
   transition: border-color 0.15s, color 0.15s;
 }
@@ -119,21 +110,22 @@
   justify-self: center;
   align-items: center;
   gap: 6px;
-  height: 32px;
+  height: 30px;
   padding: 0 14px;
-  border-radius: 16px;
-  border: none;
-  background: var(--app-accent);
-  color: #ffffff;
+  border-radius: 3px;
+  border: 1px solid var(--app-accent);
+  background: transparent;
+  color: var(--app-accent);
   font-size: 12px;
   font-weight: 500;
+  letter-spacing: 0.02em;
   white-space: nowrap;
   cursor: pointer;
-  transition: opacity 0.15s;
+  transition: background 0.15s, color 0.15s;
 }
 
 .site-header-top-tracked:hover {
-  opacity: 0.9;
+  background: var(--app-accent-bg);
 }
 
 /* ── Top-tracked modal (mobile) ─────────────────────────────────── */
@@ -156,7 +148,7 @@
   background: var(--app-bg);
   border: 1px solid var(--app-border);
   border-bottom: none;
-  border-radius: 16px 16px 0 0;
+  border-radius: 4px 4px 0 0;
   padding: 44px 20px 20px;
 }
 
@@ -175,7 +167,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 50%;
+  border-radius: 3px;
   border: 1px solid var(--app-border);
   background: var(--app-surface);
   color: var(--app-text-secondary);
@@ -204,7 +196,7 @@
 
 .site-footer-brand {
   font-family: var(--font-display);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: var(--app-text);
 }
@@ -215,7 +207,7 @@
   color: var(--app-text-secondary);
   text-decoration: none;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: 3px;
   padding: 6px 12px;
   white-space: nowrap;
   transition: border-color 0.15s, color 0.15s;
@@ -238,24 +230,24 @@
   position: fixed;
   right: 24px;
   bottom: 24px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  border: 1px solid var(--app-border);
-  background: var(--app-accent);
-  color: #ffffff;
+  width: 40px;
+  height: 40px;
+  border-radius: 4px;
+  border: 1px solid var(--app-border-hover);
+  background: var(--app-bg);
+  color: var(--app-text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
-  transition: opacity 0.15s, transform 0.15s;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  transition: border-color 0.15s, color 0.15s;
   z-index: 30;
 }
 
 .back-to-top:hover {
-  opacity: 0.9;
-  transform: translateY(-2px);
+  border-color: var(--app-accent);
+  color: var(--app-accent);
 }
 
 /* ── Spinner ─────────────────────────────────────────────────── */
@@ -297,47 +289,26 @@
   display: block;
 }
 
-.bg-dot {
-  animation: bg-dot-pulse 4.5s ease-in-out infinite;
+/* Ping/sonar circles are inline SVG <animate> elements in the markup;
+   suppressed here rather than in the component -- flat dots read as a
+   static reference chart instead of a live radar sweep. */
+.search-background circle[fill='none'] {
+  display: none;
 }
 
-@keyframes bg-dot-pulse {
-  0%, 100% { opacity: 0.12; }
-  50% { opacity: 0.42; }
+.bg-dot {
+  opacity: 0.24;
 }
 
 .bg-orbit {
   fill: none;
   stroke: var(--app-border);
   stroke-width: 1;
-  transform-box: fill-box;
-  transform-origin: center;
-}
-
-.bg-orbit-1 {
-  animation: bg-orbit-rotate 140s linear infinite;
-}
-
-.bg-orbit-2 {
-  animation: bg-orbit-rotate-reverse 110s linear infinite;
-}
-
-@keyframes bg-orbit-rotate {
-  to { transform: rotate(360deg); }
-}
-
-@keyframes bg-orbit-rotate-reverse {
-  to { transform: rotate(-360deg); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .search-background {
-    display: none;
-  }
+  stroke-dasharray: 2 4;
 }
 
 /* ── Top-tracked sidebar ─────────────────────────────────────────
-   Fixed to the left of the (untouched, still centered) search
+   Fixed to the right of the (untouched, still centered) search
    column on wide viewports. Below the breakpoint there isn't room
    for it beside the column without crowding, so it drops into
    normal flow and renders under the search page instead. ────────── */
@@ -345,7 +316,7 @@
   position: fixed;
   z-index: 5;
   top: 96px;
-  left: calc(50vw - 672px);
+  right: calc(50vw - 672px);
   width: 300px;
   max-height: calc(100vh - 120px);
   overflow-y: auto;
@@ -355,13 +326,198 @@
   .search-sidebar {
     position: static;
     top: auto;
-    left: auto;
+    right: auto;
     width: 100%;
     max-width: 680px;
     max-height: none;
     overflow-y: visible;
     margin: 0 auto 4rem;
   }
+}
+
+/* ── Filter sidebar ────────────────────────────────────────────
+   Mirrors the top-tracked sidebar on the opposite side. Only
+   shown at the same wide breakpoint -- below it, a trigger button
+   further down in the document opens the same panel as a modal. ── */
+.filter-sidebar {
+  position: fixed;
+  z-index: 5;
+  top: 96px;
+  left: calc(50vw - 672px);
+  width: 220px;
+  max-height: calc(100vh - 120px);
+  overflow-y: auto;
+}
+
+@media (max-width: 1400px) {
+  .filter-sidebar {
+    display: none;
+  }
+}
+
+.filter-sidebar-heading {
+  font-family: var(--font-display);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+}
+
+.filter-panel-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  padding-bottom: 10px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid var(--app-border);
+}
+
+.filter-clear {
+  border: none;
+  background: transparent;
+  color: var(--app-accent);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.filter-clear:hover {
+  text-decoration: underline;
+}
+
+.filter-group {
+  margin-bottom: 22px;
+}
+
+.filter-group:last-child {
+  margin-bottom: 0;
+}
+
+.filter-group-heading {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--app-text-muted);
+  margin-bottom: 8px;
+}
+
+.filter-option {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 2px;
+  font-size: 13px;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+}
+
+.filter-option:hover {
+  color: var(--app-text);
+}
+
+.filter-option input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  accent-color: var(--app-accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.filter-option-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.filter-option-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+
+/* ── Filter trigger + modal (below the wide breakpoint) ─────────── */
+.filter-trigger-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.filter-trigger {
+  height: 32px;
+  padding: 0 18px;
+  border-radius: 3px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text-secondary);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.filter-trigger:hover {
+  border-color: var(--app-border-hover);
+  color: var(--app-text);
+}
+
+@media (min-width: 1401px) {
+  .filter-trigger-row {
+    display: none;
+  }
+}
+
+.filter-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  background: rgba(5, 8, 16, 0.7);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.filter-modal {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--app-bg);
+  border: 1px solid var(--app-border);
+  border-bottom: none;
+  border-radius: 4px 4px 0 0;
+  padding: 44px 20px 20px;
+}
+
+.filter-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  border: 1px solid var(--app-border);
+  background: var(--app-surface);
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.filter-modal-close:hover {
+  border-color: var(--app-accent);
+  color: var(--app-accent);
 }
 
 /* ── Search page ─────────────────────────────────────────────── */
@@ -384,16 +540,18 @@
 
 .wordmark {
   font-family: var(--font-display);
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 600;
   color: var(--app-text);
-  letter-spacing: -0.02em;
+  letter-spacing: 0;
 }
 
 .search-subtitle {
-  font-size: 15px;
+  font-size: 13px;
   color: var(--app-text-muted);
   margin-top: 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
 }
 
 .tracked-stat {
@@ -401,28 +559,17 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  margin-top: 14px;
-  font-size: 13px;
+  margin-top: 16px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   color: var(--app-text-muted);
 }
 
 .tracked-stat-dot {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
   border-radius: 50%;
   background: var(--app-green);
-  animation: tracked-stat-pulse 2s ease-in-out infinite;
-}
-
-@keyframes tracked-stat-pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.35; }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tracked-stat-dot {
-    animation: none;
-  }
 }
 
 .search-input-wrap {
@@ -440,13 +587,13 @@
 
 .search-input {
   width: 100%;
-  height: 54px;
-  border-radius: 27px;
+  height: 52px;
+  border-radius: 4px;
   border: 1px solid var(--app-border);
   background: var(--app-surface);
   color: var(--app-text);
   padding: 0 22px 0 52px;
-  font-size: 16px;
+  font-size: 15px;
   outline: none;
   transition: border-color 0.15s, box-shadow 0.15s;
 }
@@ -457,39 +604,7 @@
 
 .search-input:focus {
   border-color: var(--app-accent);
-  box-shadow: 0 0 0 3px var(--app-accent-bg);
-}
-
-.filter-pills {
-  display: flex;
-  justify-content: center;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 18px;
-}
-
-.filter-pill {
-  height: 34px;
-  padding: 0 18px;
-  border-radius: 17px;
-  border: 1px solid var(--app-border);
-  background: var(--app-surface);
-  color: var(--app-text-secondary);
-  font-size: 14px;
-  font-weight: 400;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s, color 0.15s;
-}
-
-.filter-pill:hover {
-  border-color: var(--app-border-hover);
-}
-
-.filter-pill--active {
-  background: var(--app-accent);
-  border-color: var(--app-accent);
-  color: #ffffff;
-  font-weight: 500;
+  box-shadow: 0 0 0 1px var(--app-accent);
 }
 
 .search-results {
@@ -497,7 +612,8 @@
 }
 
 .results-count {
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   color: var(--app-text-muted);
   margin-bottom: 12px;
 }
@@ -523,7 +639,7 @@
   text-align: left;
   padding: 14px 18px;
   border: 1px solid var(--app-border);
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--app-surface);
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
@@ -564,7 +680,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  border-radius: 999px;
+  border-radius: 3px;
   flex-shrink: 0;
   background: var(--app-gray-bg);
   color: var(--app-gray);
@@ -586,12 +702,15 @@
 }
 
 .type-badge {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
   color: var(--app-text-secondary);
-  background: var(--app-gray-bg);
-  border-radius: 16px;
-  padding: 5px 12px;
+  background: transparent;
+  border: 1px solid var(--app-border);
+  border-radius: 3px;
+  padding: 4px 10px;
   white-space: nowrap;
   flex-shrink: 0;
 }
@@ -627,7 +746,7 @@
 
 .detail-name {
   font-family: var(--font-display);
-  font-size: 24px;
+  font-size: 23px;
   font-weight: 600;
   color: var(--app-text);
 }
@@ -647,30 +766,34 @@
 
 .metric-card {
   border: 1px solid var(--app-border);
-  border-radius: 10px;
+  border-radius: 4px;
   background: var(--app-surface);
   padding: 16px 18px;
 }
 
 .metric-label {
-  font-size: 12px;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
   color: var(--app-text-muted);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
 .metric-value {
-  font-family: var(--font-display);
-  font-size: 22px;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 19px;
+  font-weight: 500;
   color: var(--app-text);
 }
 
 .section-heading {
   font-family: var(--font-display);
-  font-size: 18px;
+  font-size: 17px;
   font-weight: 600;
   color: var(--app-text);
   margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--app-border);
 }
 
 /* ── Timeline ────────────────────────────────────────────────── */
@@ -718,7 +841,8 @@
 }
 
 .timeline-ts {
-  font-size: 13px;
+  font-family: var(--font-mono);
+  font-size: 12px;
   color: var(--app-text-muted);
   margin-bottom: 4px;
 }
@@ -759,7 +883,7 @@
 
 .info-heading {
   font-family: var(--font-display);
-  font-size: 20px;
+  font-size: 19px;
   font-weight: 600;
   color: var(--app-text);
   margin-bottom: 10px;
@@ -775,7 +899,7 @@
 .feedback-card {
   padding: 32px;
   border: 1px solid var(--app-border);
-  border-radius: 16px;
+  border-radius: 4px;
   background: var(--app-surface);
 }
 
@@ -804,7 +928,7 @@
 .feedback-field textarea {
   width: 100%;
   border: 1px solid var(--app-border);
-  border-radius: 8px;
+  border-radius: 4px;
   padding: 10px 14px;
   font-size: 14px;
   color: var(--app-text);
@@ -819,7 +943,7 @@
 .feedback-field input:focus,
 .feedback-field textarea:focus {
   border-color: var(--app-accent);
-  box-shadow: 0 0 0 3px var(--app-accent-bg);
+  box-shadow: 0 0 0 1px var(--app-accent);
 }
 
 .feedback-error {
@@ -829,14 +953,15 @@
 
 .feedback-submit {
   align-self: center;
-  height: 40px;
-  padding: 0 22px;
-  border-radius: 8px;
+  height: 38px;
+  padding: 0 20px;
+  border-radius: 4px;
   border: none;
   background: var(--app-accent);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 500;
+  letter-spacing: 0.02em;
   cursor: pointer;
   transition: opacity 0.15s;
 }
@@ -862,7 +987,8 @@
   align-items: center;
   gap: 14px;
   border: 1px solid var(--app-border);
-  border-radius: 10px;
+  border-left: 2px solid var(--app-accent);
+  border-radius: 4px;
   padding: 16px 18px;
   margin-bottom: 28px;
   background: var(--app-surface);
@@ -892,21 +1018,22 @@
 
 .report-hint-button {
   flex-shrink: 0;
-  height: 34px;
-  padding: 0 16px;
-  border-radius: 8px;
+  height: 32px;
+  padding: 0 14px;
+  border-radius: 4px;
   border: 1px solid var(--app-border);
   background: transparent;
   color: var(--app-text-muted);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
+  letter-spacing: 0.02em;
   cursor: default;
 }
 
 /* ── Top tracked ─────────────────────────────────────────────── */
 .top-tracked-card {
   border: 1px solid var(--app-border);
-  border-radius: 12px;
+  border-radius: 4px;
   background: var(--app-surface);
   padding: 20px;
 }
@@ -917,13 +1044,17 @@
   gap: 8px;
   color: var(--app-accent);
   margin-bottom: 14px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--app-border);
 }
 
 .top-tracked-title {
   font-family: var(--font-display);
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 600;
   color: var(--app-text);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
 }
 
 .top-tracked-state {
@@ -952,7 +1083,7 @@
   text-align: left;
   padding: 8px;
   border: 1px solid transparent;
-  border-radius: 8px;
+  border-radius: 3px;
   background: transparent;
   cursor: pointer;
   transition: background 0.15s, border-color 0.15s;
@@ -966,9 +1097,9 @@
 .top-tracked-rank {
   width: 18px;
   flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
   color: var(--app-text-muted);
   text-align: center;
 }
@@ -999,9 +1130,9 @@
 
 .top-tracked-hits {
   flex-shrink: 0;
-  font-family: var(--font-display);
-  font-size: 13px;
-  font-weight: 600;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
   color: var(--app-accent);
 }
 

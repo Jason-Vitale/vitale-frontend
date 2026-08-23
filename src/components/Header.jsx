@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { TrendingUp, X } from 'lucide-react';
+import { X } from 'lucide-react';
 import TopTracked from './TopTracked';
 
 export default function Header() {
@@ -48,7 +48,6 @@ export default function Header() {
           className="site-header-top-tracked"
           onClick={() => setTopTrackedOpen(true)}
         >
-          <TrendingUp size={14} strokeWidth={2} />
           Top tracked
         </button>
         <button type="button" className="site-header-about" onClick={handleAboutClick}>

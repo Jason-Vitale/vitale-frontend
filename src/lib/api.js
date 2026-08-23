@@ -104,7 +104,7 @@ function normalizeAuditEvent(raw) {
   };
 }
 
-export async function searchObjects({ q = '', type = 'all' } = {}) {
+export async function searchObjects({ q = '' } = {}) {
   const trimmed = q.trim();
   if (!trimmed) return { results: [], count: 0, rawCount: 0, totalMatches: 0 };
 
@@ -113,14 +113,9 @@ export async function searchObjects({ q = '', type = 'all' } = {}) {
   const data = await parseJsonResponse(res);
 
   const rawObjects = data.objects || [];
-  let results = rawObjects.map(normalizeObject);
-  // The search endpoint has no type filter server-side, so it's applied here.
-  // rawCount/totalMatches deliberately reflect the unfiltered response --
-  // they describe server-side truncation, independent of this client-side
-  // narrowing.
-  if (type !== 'all') {
-    results = results.filter((obj) => obj.type === type);
-  }
+  const results = rawObjects.map(normalizeObject);
+  // Type/country/launch-window narrowing all happen client-side against this
+  // unfiltered list; rawCount/totalMatches describe server-side truncation.
   return {
     results,
     count: results.length,
