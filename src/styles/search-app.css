@@ -396,6 +396,35 @@
   margin-top: 8px;
 }
 
+.tracked-stat {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--app-text-muted);
+}
+
+.tracked-stat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--app-green);
+  animation: tracked-stat-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tracked-stat-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tracked-stat-dot {
+    animation: none;
+  }
+}
+
 .search-input-wrap {
   position: relative;
   display: flex;

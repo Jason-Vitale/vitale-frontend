@@ -6,7 +6,7 @@ import FeedbackForm from '../components/FeedbackForm';
 import Spinner from '../components/Spinner';
 import SearchBackground from '../components/SearchBackground';
 import TopTracked from '../components/TopTracked';
-import { searchObjects } from '../lib/api';
+import { getStats, searchObjects } from '../lib/api';
 import { formatRelativeTime, TYPE_LABELS } from '../lib/format';
 
 const FILTERS = [
@@ -23,6 +23,7 @@ export default function SearchPage() {
   const [loading, setLoading] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
   const [error, setError] = useState(null);
+  const [trackedObjects, setTrackedObjects] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -31,6 +32,20 @@ export default function SearchPage() {
       document.getElementById('about')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, [location.hash]);
+
+  useEffect(() => {
+    let cancelled = false;
+    getStats()
+      .then((data) => {
+        if (!cancelled) setTrackedObjects(data.trackedObjects);
+      })
+      .catch(() => {
+        // Decorative stat -- fail silently rather than erroring the hero.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     const trimmed = query.trim();
@@ -66,6 +81,12 @@ export default function SearchPage() {
         <header className="search-header">
           <div className="wordmark"><span className="brand-v">V</span>itale</div>
           <p className="search-subtitle">Orbital object search &amp; audit history</p>
+          {trackedObjects !== null && (
+            <div className="tracked-stat">
+              <span className="tracked-stat-dot" />
+              {trackedObjects.toLocaleString()} objects tracked
+            </div>
+          )}
         </header>
 
         <div className="search-input-wrap">
@@ -158,10 +179,10 @@ export default function SearchPage() {
           <section className="info-section" id="how-it-works">
             <h2 className="info-heading">How search works</h2>
             <p className="info-body">
-              Search matches against object name, NORAD catalog ID, or COSPAR ID. Orbital
-              parameters and epoch are refreshed from Space-Track two-line element sets, and
-              audit history captures every catalog update, maneuver, and conjunction screening
-              result recorded for the object.
+              Search matches against object name, NORAD catalog ID, or COSPAR ID. Catalog
+              details are kept current against the Vitale object database, and audit history
+              captures every catalog update, maneuver, and conjunction screening result
+              recorded for the object.
             </p>
           </section>
 
