@@ -500,7 +500,7 @@
   z-index: 5;
   top: calc(var(--header-height) + 28px);
   right: calc(50vw - 672px);
-  width: 300px;
+  width: 220px;
   max-height: calc(100vh - var(--header-height) - 52px);
   overflow-y: auto;
 }
@@ -1117,6 +1117,13 @@
 .info-section {
   text-align: center;
   scroll-margin-top: 88px;
+}
+
+/* Divider between "How search works" and "About Vitale" so the two read
+   as visually distinct topics instead of one continuous block. */
+#about {
+  border-top: 1px solid var(--app-border);
+  padding-top: 24px;
 }
 
 .info-heading {
