@@ -46,6 +46,52 @@
   flex: 1;
 }
 
+/* ── Maintenance banner ──────────────────────────────────────────── */
+.maintenance-banner {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 10px 44px 10px 16px;
+  background: var(--app-amber-bg);
+  border-bottom: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--app-text);
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.maintenance-banner-close {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 3px;
+  background: transparent;
+  color: var(--app-text-secondary);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.maintenance-banner-close:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--app-text);
+}
+
+@media (max-width: 640px) {
+  .maintenance-banner {
+    padding: 10px 40px 10px 12px;
+    font-size: 12px;
+  }
+}
+
 /* ── Site header / footer (global) ──────────────────────────────── */
 .site-header {
   position: sticky;
@@ -253,6 +299,8 @@
 }
 
 .site-footer {
+  position: relative;
+  z-index: 10;
   background: var(--app-bg);
   border-top: 1px solid var(--app-border);
   padding: 20px 24px;
@@ -431,11 +479,27 @@
 
 .filter-sidebar-heading {
   font-family: var(--font-display);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 600;
-  letter-spacing: 0.05em;
+  color: var(--app-text);
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  color: var(--app-text-muted);
+}
+
+/* Same card treatment as .top-tracked-card, so the two sidebars read as one
+   consistent system. Unboxed inside .filter-modal -- the modal itself
+   already provides the border/background/padding there. */
+.filter-panel {
+  border: 1px solid var(--app-border);
+  border-radius: 4px;
+  background: var(--app-surface);
+  padding: 20px;
+}
+
+.filter-modal .filter-panel {
+  border: none;
+  background: none;
+  padding: 0;
 }
 
 .filter-panel-top {
@@ -443,8 +507,8 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 8px;
-  padding-bottom: 10px;
-  margin-bottom: 12px;
+  padding-bottom: 12px;
+  margin-bottom: 14px;
   border-bottom: 1px solid var(--app-border);
 }
 
