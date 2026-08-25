@@ -178,7 +178,7 @@ export default function SearchPage() {
           <div className="wordmark">
             <Wordmark />
           </div>
-          <p className="search-subtitle">Orbital object search &amp; audit history</p>
+          <p className="search-subtitle">Orbital object search &amp; audit history catalog</p>
           {trackedObjects !== null && (
             <div className="tracked-stat">
               <span className="tracked-stat-dot" />
