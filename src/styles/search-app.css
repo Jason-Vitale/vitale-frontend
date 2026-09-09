@@ -1154,6 +1154,65 @@
 .timeline-row--catalog .timeline-dot,
 .timeline-row--administrative .timeline-dot { border-color: var(--app-gray); }
 
+/* ── Timeline groups (collapsed day/week/month buckets) ─────────── */
+.timeline-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-group-header {
+  display: flex;
+  gap: 16px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.timeline-group-header .timeline-content--group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timeline-group-chevron {
+  color: var(--app-text-muted);
+  flex-shrink: 0;
+}
+
+.timeline-group-label {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--app-text);
+}
+
+.timeline-group-count {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  color: var(--app-text-muted);
+  background: var(--app-border);
+  border-radius: 999px;
+  padding: 2px 9px;
+}
+
+.timeline-group-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-group--maneuver .timeline-group-header .timeline-dot { border-color: var(--app-amber); }
+.timeline-group--stable .timeline-group-header .timeline-dot,
+.timeline-group--nominal .timeline-group-header .timeline-dot { border-color: var(--app-green); }
+.timeline-group--routine .timeline-group-header .timeline-dot { border-color: var(--app-blue); }
+.timeline-group--catalog .timeline-group-header .timeline-dot,
+.timeline-group--administrative .timeline-group-header .timeline-dot { border-color: var(--app-gray); }
+
 /* ── Info sections (about / how it works / feedback) ────────────── */
 .info-sections {
   margin-top: 64px;

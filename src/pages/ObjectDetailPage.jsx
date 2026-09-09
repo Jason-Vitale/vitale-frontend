@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { ArrowLeft, FileText } from 'lucide-react';
 import TypeIcon from '../components/TypeIcon';
 import Spinner from '../components/Spinner';
+import TimelineGroup from '../components/TimelineGroup';
 import { getObject, getObjectAudit } from '../lib/api';
-import { formatDate, formatTimestamp, TYPE_LABELS } from '../lib/format';
+import { formatDate, groupTimelineEvents, TYPE_LABELS } from '../lib/format';
 
 export default function ObjectDetailPage() {
   const { noradId } = useParams();
@@ -47,6 +48,8 @@ export default function ObjectDetailPage() {
       cancelled = true;
     };
   }, [noradId]);
+
+  const timelineGroups = useMemo(() => groupTimelineEvents(events), [events]);
 
   const metaParts = object
     ? [
@@ -128,18 +131,12 @@ export default function ObjectDetailPage() {
 
           {!eventsError && events.length > 0 && (
             <div className="timeline">
-              {events.map((event) => (
-                <div key={event.id} className={`timeline-row timeline-row--${event.severity}`}>
-                  <div className="timeline-marker">
-                    <span className="timeline-dot" />
-                    <span className="timeline-line" />
-                  </div>
-                  <div className="timeline-content">
-                    <div className="timeline-ts">{formatTimestamp(event.eventTime)}</div>
-                    <div className="timeline-label">{event.label}</div>
-                    {event.detail && <div className="timeline-detail">{event.detail}</div>}
-                  </div>
-                </div>
+              {timelineGroups.map((group, index) => (
+                <TimelineGroup
+                  key={group.key}
+                  group={group}
+                  isLast={index === timelineGroups.length - 1}
+                />
               ))}
             </div>
           )}
