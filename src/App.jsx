@@ -5,6 +5,7 @@ import BackToTop from './components/BackToTop';
 import MaintenanceBanner from './components/MaintenanceBanner';
 import SearchPage from './pages/SearchPage';
 import ObjectDetailPage from './pages/ObjectDetailPage';
+import ProgressPage from './pages/ProgressPage';
 
 export default function App() {
   return (
@@ -16,6 +17,7 @@ export default function App() {
           <Routes>
             <Route path="/" element={<SearchPage />} />
             <Route path="/objects/:noradId" element={<ObjectDetailPage />} />
+            <Route path="/progress" element={<ProgressPage />} />
           </Routes>
         </main>
         <Footer />

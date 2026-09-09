@@ -150,7 +150,12 @@ export async function getTopTracked(n = 10) {
 export async function getStats() {
   const res = await safeFetch(`${API_BASE}/stats`);
   const data = await parseJsonResponse(res);
-  return { trackedObjects: data.tracked_objects };
+  return {
+    trackedObjects: data.tracked_objects,
+    // Coverage of the GP-polling rotation sweeping the catalog (~500/hr),
+    // not an activity/event count -- it climbs steadily on its own.
+    objectsWithSnapshot: data.objects_with_snapshot,
+  };
 }
 
 // The full catalog only refreshes ~once/day server-side, so it's cached in
