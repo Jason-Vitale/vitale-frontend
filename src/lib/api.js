@@ -154,7 +154,7 @@ export async function getStats() {
     trackedObjects: data.tracked_objects,
     // Coverage of the GP-polling rotation sweeping the catalog (~500/hr),
     // not an activity/event count -- it climbs steadily on its own.
-    objectsWithSnapshot: data.objects_with_snapshot,
+    objectsWithSnapshot: data.objects_with_snapshot ?? 0,
   };
 }
 
