@@ -145,11 +145,11 @@ function finalizeGroup(group) {
   return { ...group, severity: dominantSeverity(group.events) };
 }
 
-// Buckets this month's events by week, then by day within each week. A week
-// that only touched a single calendar day collapses straight into that
-// day bucket -- no point showing a "week" header that only ever expands
-// to one day.
-function groupCurrentMonthEvents(events) {
+// Buckets a run of same-month events by week, then by day within each
+// week. A week that only touched a single calendar day collapses straight
+// into that day bucket -- no point showing a "week" header that only ever
+// expands to one day.
+function groupByWeekThenDay(events) {
   return bucketConsecutive(events, weekKey, weekLabel).map((week) => {
     const days = bucketConsecutive(week.events, dayKey, dayLabel);
     if (days.length <= 1) return finalizeGroup(days[0] || week);
@@ -157,14 +157,21 @@ function groupCurrentMonthEvents(events) {
   });
 }
 
-// Everything older than the current calendar month rolls up into a flat
-// per-month bucket -- fine-grained week/day detail stops being useful once
-// it's not the active month. Month buckets always render as an expandable
-// header, even a single-event month, so scrolling through history reads
-// consistently rather than some months collapsing and others not.
+// The current month's events nest as week -> day directly, since the
+// month itself is the implied top-level context and doesn't need its own
+// header.
+function groupCurrentMonthEvents(events) {
+  return groupByWeekThenDay(events);
+}
+
+// Everything older than the current calendar month still nests as
+// month -> week -> day, so history reads the same way no matter how far
+// back it goes. Month buckets always render as an expandable header, even
+// a single-event month, so scrolling through history stays consistent
+// rather than some months collapsing and others not.
 function groupOlderEvents(events) {
-  return bucketConsecutive(events, monthKey, monthLabel).map((group) =>
-    finalizeGroup({ ...group, alwaysExpandable: true })
+  return bucketConsecutive(events, monthKey, monthLabel).map((month) =>
+    finalizeGroup({ ...month, children: groupByWeekThenDay(month.events), alwaysExpandable: true })
   );
 }
 
