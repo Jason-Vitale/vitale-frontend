@@ -112,8 +112,8 @@ export default function ObjectDetailPage() {
 
           <p className="report-note">
             <FileText size={14} strokeWidth={2} className="report-note-icon" />
-            Full compliance-grade audit report — deviation history, deorbit plan verification, and
-            FCC-ready export — planned for a future release.
+            A full compliance-grade audit report, including deviation history, deorbit plan
+            verification, and FCC-ready export, is planned for a future release.
           </p>
 
           <div className="audit-header">

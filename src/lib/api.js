@@ -58,6 +58,7 @@ function normalizeObject(raw) {
     rcsSize: raw.rcs_size || '',
     decayDate: raw.decay_date || '',
     hits: raw.hit_count ?? 0,
+    eventCount: raw.event_count ?? 0,
   };
 }
 
@@ -144,6 +145,15 @@ export async function getObjectAudit(noradId) {
 export async function getTopTracked(n = 10) {
   const params = new URLSearchParams({ limit: n });
   const res = await safeFetch(`${API_BASE}/objects/popular?${params}`);
+  const data = await parseJsonResponse(res);
+  return { results: (data.objects || []).map(normalizeObject) };
+}
+
+// Same shape/conventions as getTopTracked(), ranked by audit-event count
+// instead of search hits.
+export async function getTopEvents(n = 10) {
+  const params = new URLSearchParams({ limit: n });
+  const res = await safeFetch(`${API_BASE}/objects/top-events?${params}`);
   const data = await parseJsonResponse(res);
   return { results: (data.objects || []).map(normalizeObject) };
 }

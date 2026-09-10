@@ -2,27 +2,34 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import TypeIcon from './TypeIcon';
 import Spinner from './Spinner';
-import { getTopTracked } from '../lib/api';
+import { getTopEvents, getTopTracked } from '../lib/api';
 
-// Self-contained card: fetches the top `limit` tracked objects by hits and
-// renders a ranked list. Layout-agnostic so it can drop into a sidebar,
-// a slide-out panel, or anywhere else without extra wiring.
-export default function TopTracked({ limit = 10, title = 'Top tracked objects', onSelect }) {
+const METRICS = {
+  hits: { fetch: getTopTracked, value: (obj) => obj.hits },
+  events: { fetch: getTopEvents, value: (obj) => obj.eventCount },
+};
+
+// Self-contained card: fetches the top `limit` objects ranked by either
+// search hits or audit-event count and renders a ranked list.
+// Layout-agnostic so it can drop into a sidebar, a slide-out panel, or
+// anywhere else without extra wiring.
+export default function TopTracked({ limit = 10, title = 'Most viewed objects', metric = 'hits', onSelect }) {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const { fetch: fetchRanked, value: rankValue } = METRICS[metric];
 
   useEffect(() => {
     let cancelled = false;
     setLoading(true);
     setError(null);
-    getTopTracked(limit)
+    fetchRanked(limit)
       .then((data) => {
         if (!cancelled) setResults(data.results);
       })
       .catch((err) => {
-        if (!cancelled) setError(err.message || 'Failed to load top tracked objects');
+        if (!cancelled) setError(err.message || 'Failed to load ranked objects');
       })
       .finally(() => {
         if (!cancelled) setLoading(false);
@@ -30,7 +37,7 @@ export default function TopTracked({ limit = 10, title = 'Top tracked objects', 
     return () => {
       cancelled = true;
     };
-  }, [limit]);
+  }, [limit, fetchRanked]);
 
   return (
     <div className="top-tracked-card">
@@ -71,7 +78,7 @@ export default function TopTracked({ limit = 10, title = 'Top tracked objects', 
                     NORAD {obj.noradId} · {obj.country}
                   </span>
                 </span>
-                <span className="top-tracked-hits">{obj.hits.toLocaleString()}</span>
+                <span className="top-tracked-hits">{rankValue(obj).toLocaleString()}</span>
               </button>
             </li>
           ))}

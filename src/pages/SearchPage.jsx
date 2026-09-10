@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, X } from 'lucide-react';
 import TypeIcon from '../components/TypeIcon';
 import FeedbackForm from '../components/FeedbackForm';
@@ -154,6 +154,10 @@ export default function SearchPage() {
     setSelectedWindows(new Set());
   };
 
+  const handleComplianceInterest = () => {
+    document.getElementById('feedback')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const filterPanelProps = {
     results: baseResults,
     selectedTypes,
@@ -238,8 +242,8 @@ export default function SearchPage() {
                   ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} catalog objects match`
                   : `${browseResults.length.toLocaleString()} objects in the catalog · filter to narrow, or search above`
                 : filterCount > 0
-                  ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} top tracked objects shown`
-                  : `Showing ${browseResults.length.toLocaleString()} top tracked objects · search above for something specific`}
+                  ? `${filteredResults.length.toLocaleString()} of ${browseResults.length.toLocaleString()} most viewed objects shown`
+                  : `Showing ${browseResults.length.toLocaleString()} most viewed objects · search above for something specific`}
               {isRenderTruncated ? ` · showing first ${MAX_RENDERED_RESULTS}` : ''}
             </div>
           )}
@@ -344,15 +348,41 @@ export default function SearchPage() {
             <div className="info-eyebrow">Reference</div>
             <h2 className="info-heading">About Vitale</h2>
             <p className="info-body">
-              Vitale continuously monitors orbital object history, including element set
-              updates, station-keeping and collision-avoidance maneuvers, and RCS and
-              catalog changes. This builds a standing audit trail against FCC orbital
-              debris mitigation filings, ITU frequency coordination and UN Register of
-              Objects submissions, and IADC space debris mitigation guidelines, including
-              post-mission disposal and 25-year deorbit timelines. Operators, regulators, and
-              researchers use that record for compliance verification, academic and
-              policy research, and independent confirmation of on-orbit activity.
+              Vitale is a public, searchable audit trail for orbital objects, including
+              satellites, rocket bodies, and debris, built directly from Space-Track
+              catalog data. Every element-set update, station-keeping or
+              collision-avoidance maneuver, and catalog change is logged and
+              timestamped, giving researchers, students, and the public an independent,
+              freely searchable record of on-orbit activity.
             </p>
+          </section>
+
+          <section className="info-section" id="compliance">
+            <div className="info-eyebrow">In development</div>
+            <h2 className="info-heading">Fleet audit &amp; compliance platform</h2>
+            <p className="info-body">
+              Vitale is extending beyond public search into a complete audit and compliance
+              platform for operators, regulators, and enterprises managing a fleet in low
+              Earth orbit and beyond. This includes defining custom audit events and
+              thresholds across an entire fleet, tied to an organization&rsquo;s own flight
+              plans and regulatory filings, such as an orbital deviation limit, a deorbit
+              timeline, or an FCC or ITU filing window. Deviations generate automatic flags
+              and roll up into compliance-grade reports that link directly into an
+              organization&rsquo;s existing compliance program.
+            </p>
+            <p className="info-body">
+              The current public version supports a fixed set of detection rules at no
+              cost. Fleet-specific rules and reporting are part of the platform described
+              above.
+            </p>
+            <div className="info-actions">
+              <Link to="/rules" className="info-action-link">
+                View current audit events
+              </Link>
+              <button type="button" className="info-action-button" onClick={handleComplianceInterest}>
+                Request platform onboarding
+              </button>
+            </div>
           </section>
 
           <section className="info-section" id="feedback">
@@ -360,8 +390,8 @@ export default function SearchPage() {
               <div className="info-eyebrow">Reference</div>
               <h2 className="info-heading">Contact us</h2>
               <p className="info-body">
-                Report an issue, suggest an improvement, or request audit event
-                onboarding if you operate tracked objects. We read every message.
+                For issues with the public catalog, feature requests, or inquiries about
+                the fleet audit and compliance platform, use the form below.
               </p>
               <FeedbackForm />
             </div>
@@ -375,7 +405,8 @@ export default function SearchPage() {
       </div>
 
       <aside className="search-sidebar">
-        <TopTracked limit={10} />
+        <TopTracked limit={5} title="Most viewed objects" metric="hits" />
+        <TopTracked limit={5} title="Most audited objects" metric="events" />
       </aside>
       </div>
 

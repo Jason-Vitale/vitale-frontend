@@ -8,7 +8,9 @@ export default function Header() {
   const location = useLocation();
   const navigate = useNavigate();
   const headerRef = useRef(null);
-  const [topTrackedOpen, setTopTrackedOpen] = useState(false);
+  // Which ranked-list modal is open: null, 'hits' (Most viewed), or
+  // 'events' (Most audited).
+  const [rankedPanel, setRankedPanel] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Publishes the header's real rendered height as a CSS variable so fixed
@@ -28,9 +30,9 @@ export default function Header() {
   }, []);
 
   useEffect(() => {
-    if (!topTrackedOpen) return;
+    if (!rankedPanel) return;
     const onKeyDown = (e) => {
-      if (e.key === 'Escape') setTopTrackedOpen(false);
+      if (e.key === 'Escape') setRankedPanel(null);
     };
     document.addEventListener('keydown', onKeyDown);
     document.body.style.overflow = 'hidden';
@@ -38,7 +40,7 @@ export default function Header() {
       document.removeEventListener('keydown', onKeyDown);
       document.body.style.overflow = '';
     };
-  }, [topTrackedOpen]);
+  }, [rankedPanel]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -66,9 +68,9 @@ export default function Header() {
     }
   };
 
-  const handleTopTrackedClick = () => {
+  const handleRankedPanelClick = (metric) => () => {
     setMenuOpen(false);
-    setTopTrackedOpen(true);
+    setRankedPanel(metric);
   };
 
   return (
@@ -81,6 +83,9 @@ export default function Header() {
         <span className="site-header-tagline">Orbital Auditing Catalog</span>
 
         <div className="site-header-actions">
+          <Link to="/rules" className="site-header-about">
+            Supported events
+          </Link>
           <button type="button" className="site-header-about" onClick={handleSectionLink('about')}>
             About
           </button>
@@ -112,9 +117,15 @@ export default function Header() {
           onClick={() => setMenuOpen(false)}
         />
         <div className={`site-header-menu${menuOpen ? ' is-open' : ''}`} aria-hidden={!menuOpen}>
-          <button type="button" className="site-header-menu-item" onClick={handleTopTrackedClick}>
-            Top tracked
+          <button type="button" className="site-header-menu-item" onClick={handleRankedPanelClick('hits')}>
+            Most viewed
           </button>
+          <button type="button" className="site-header-menu-item" onClick={handleRankedPanelClick('events')}>
+            Most audited
+          </button>
+          <Link to="/rules" className="site-header-menu-item" onClick={() => setMenuOpen(false)}>
+            Supported events
+          </Link>
           <button type="button" className="site-header-menu-item" onClick={handleSectionLink('about')}>
             About
           </button>
@@ -129,14 +140,14 @@ export default function Header() {
       </header>
 
       <div
-        className={`top-tracked-modal-backdrop${topTrackedOpen ? ' is-open' : ''}`}
-        onClick={() => setTopTrackedOpen(false)}
+        className={`top-tracked-modal-backdrop${rankedPanel ? ' is-open' : ''}`}
+        onClick={() => setRankedPanel(null)}
       >
         <div className="top-tracked-modal" onClick={(e) => e.stopPropagation()}>
           <button
             type="button"
             className="top-tracked-modal-close"
-            onClick={() => setTopTrackedOpen(false)}
+            onClick={() => setRankedPanel(null)}
             aria-label="Close"
           >
             <X size={18} strokeWidth={2} />
@@ -144,7 +155,14 @@ export default function Header() {
           {/* Only mounted while open -- avoids an extra fetch on every page
               load now that the modal shell itself is always mounted for
               the transition to animate. */}
-          {topTrackedOpen && <TopTracked limit={10} onSelect={() => setTopTrackedOpen(false)} />}
+          {rankedPanel && (
+            <TopTracked
+              limit={5}
+              title={rankedPanel === 'events' ? 'Most audited objects' : 'Most viewed objects'}
+              metric={rankedPanel}
+              onSelect={() => setRankedPanel(null)}
+            />
+          )}
         </div>
       </div>
     </>
