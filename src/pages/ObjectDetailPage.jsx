@@ -5,7 +5,7 @@ import TypeIcon from '../components/TypeIcon';
 import Spinner from '../components/Spinner';
 import TimelineGroup from '../components/TimelineGroup';
 import { getObject, getObjectAudit } from '../lib/api';
-import { formatDate, groupTimelineEvents, TYPE_LABELS } from '../lib/format';
+import { formatDate, formatRelativeTime, groupTimelineEvents, TYPE_LABELS } from '../lib/format';
 
 export default function ObjectDetailPage() {
   const { noradId } = useParams();
@@ -50,6 +50,10 @@ export default function ObjectDetailPage() {
   }, [noradId]);
 
   const timelineGroups = useMemo(() => groupTimelineEvents(events), [events]);
+  const latestEventTime = useMemo(
+    () => events.reduce((latest, e) => (!latest || e.eventTime > latest ? e.eventTime : latest), null),
+    [events]
+  );
 
   const metaParts = object
     ? [
@@ -106,20 +110,20 @@ export default function ObjectDetailPage() {
             </div>
           </div>
 
-          <div className="report-hint">
-            <FileText size={18} strokeWidth={2} className="report-hint-icon" />
-            <div className="report-hint-text">
-              <div className="report-hint-title">Full compliance-grade audit report</div>
-              <div className="report-hint-sub">
-                Deviation history, deorbit plan verification, and FCC-ready export for this object.
-              </div>
-            </div>
-            <button type="button" className="report-hint-button" disabled title="Coming soon">
-              Generate report
-            </button>
-          </div>
+          <p className="report-note">
+            <FileText size={14} strokeWidth={2} className="report-note-icon" />
+            Full compliance-grade audit report — deviation history, deorbit plan verification, and
+            FCC-ready export — planned for a future release.
+          </p>
 
-          <h2 className="section-heading">Audit history</h2>
+          <div className="audit-header">
+            <h2 className="audit-header-title">Audit record</h2>
+            {events.length > 0 && (
+              <span className="audit-header-count">
+                {events.length} {events.length === 1 ? 'entry' : 'entries'}
+              </span>
+            )}
+          </div>
 
           {eventsError && (
             <div className="search-state search-state--no-results">{eventsError}</div>
@@ -130,16 +134,17 @@ export default function ObjectDetailPage() {
           )}
 
           {!eventsError && events.length > 0 && (
-            <div className="timeline">
-              {timelineGroups.map((group, index) => (
-                <TimelineGroup
-                  key={group.key}
-                  group={group}
-                  isLast={index === timelineGroups.length - 1}
-                />
+            <div className="audit-list">
+              {timelineGroups.map((group) => (
+                <TimelineGroup key={group.key} group={group} />
               ))}
             </div>
           )}
+
+          <div className="provenance">
+            <span>Source: Space-Track.org</span>
+            {latestEventTime && <span>Latest event: {formatRelativeTime(latestEventTime)}</span>}
+          </div>
         </>
       )}
     </div>

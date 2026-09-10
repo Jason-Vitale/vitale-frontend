@@ -1,14 +1,6 @@
-import BrandMark from './BrandMark';
-
-// The "Vitale" wordmark as one laid-out unit -- the V mark plus "itale",
-// flexed and centered together here once, instead of each of the three
-// usages (header, footer, search page) re-implementing the same pairing
-// and risking drifting out of sync with each other.
+// Plain-text "Vitale" wordmark -- used by the header, footer, and search
+// page alike so all three stay in sync. The graphical brand mark lives only
+// in the browser tab favicon (public/favicon.svg), not on the page itself.
 export default function Wordmark() {
-  return (
-    <span className="brand-wordmark">
-      <BrandMark className="brand-v" />
-      <span>itale</span>
-    </span>
-  );
+  return <span className="brand-wordmark">Vitale</span>;
 }

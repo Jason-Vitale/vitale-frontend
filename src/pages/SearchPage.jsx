@@ -1,10 +1,9 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Search, ChevronRight, X } from 'lucide-react';
+import { Search, X } from 'lucide-react';
 import TypeIcon from '../components/TypeIcon';
 import FeedbackForm from '../components/FeedbackForm';
 import Spinner from '../components/Spinner';
-import SearchBackground from '../components/SearchBackground';
 import TopTracked from '../components/TopTracked';
 import FilterPanel from '../components/FilterPanel';
 import Wordmark from '../components/Wordmark';
@@ -168,23 +167,19 @@ export default function SearchPage() {
 
   return (
     <>
+      <div className="search-layout">
       <aside className="filter-sidebar">
         <FilterPanel {...filterPanelProps} />
       </aside>
 
       <div className="search-page">
-        <SearchBackground />
         <header className="search-header">
-          <div className="wordmark">
-            <Wordmark />
-          </div>
-          <p className="search-subtitle">Orbital object search &amp; audit history catalog</p>
-          {trackedObjects !== null && (
-            <div className="tracked-stat">
-              <span className="tracked-stat-dot" />
-              {trackedObjects.toLocaleString()} objects tracked
+          <div className="search-header-brand">
+            <div className="wordmark">
+              <Wordmark />
             </div>
-          )}
+            <p className="search-subtitle">Orbital object search &amp; audit history catalog</p>
+          </div>
         </header>
 
         <div className="search-input-wrap">
@@ -201,6 +196,21 @@ export default function SearchPage() {
             placeholder="Search by name, NORAD ID, or COSPAR ID"
             autoFocus
           />
+        </div>
+
+        <div className="stat-strip">
+          <div className="stat-cell">
+            <div className="stat-value">{trackedObjects !== null ? trackedObjects.toLocaleString() : '—'}</div>
+            <div className="stat-label">Tracked objects</div>
+          </div>
+          <div className="stat-cell">
+            <div className="stat-value">Hourly</div>
+            <div className="stat-label">Orbital state sync</div>
+          </div>
+          <div className="stat-cell">
+            <div className="stat-value">Daily</div>
+            <div className="stat-label">Catalog sync</div>
+          </div>
         </div>
 
         <div className="filter-trigger-row">
@@ -274,35 +284,48 @@ export default function SearchPage() {
             </div>
           )}
 
-          <div className="results-list">
-            {renderedResults.map((obj) => {
-              const subParts = [
-                `NORAD ${obj.noradId}`,
-                obj.country,
-                obj.launchDate ? `Launched ${formatRelativeTime(obj.launchDate)}` : null,
-              ].filter(Boolean);
-              return (
-                <button
-                  key={obj.noradId}
-                  type="button"
-                  className="result-row"
-                  onClick={() => navigate(`/objects/${obj.noradId}`)}
-                >
-                  <TypeIcon type={obj.type} />
-                  <div className="result-row-main">
-                    <div className="result-row-name">{obj.name}</div>
-                    <div className="result-row-sub">{subParts.join(' · ')}</div>
-                  </div>
-                  <span className="type-badge">{TYPE_LABELS[obj.type] || obj.type}</span>
-                  <ChevronRight className="result-row-chevron" size={18} strokeWidth={2} />
-                </button>
-              );
-            })}
-          </div>
+          {renderedResults.length > 0 && (
+            <div className="results-table-wrap">
+              <table className="results-table">
+                <thead>
+                  <tr>
+                    <th className="results-table-col-name">Object</th>
+                    <th>NORAD ID</th>
+                    <th>Country</th>
+                    <th>Type</th>
+                    <th>Launched</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {renderedResults.map((obj) => (
+                    <tr
+                      key={obj.noradId}
+                      className="results-table-row"
+                      tabIndex={0}
+                      onClick={() => navigate(`/objects/${obj.noradId}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') navigate(`/objects/${obj.noradId}`);
+                      }}
+                    >
+                      <td className="results-table-name">
+                        <TypeIcon type={obj.type} size={16} />
+                        {obj.name}
+                      </td>
+                      <td>{obj.noradId}</td>
+                      <td>{obj.country || '—'}</td>
+                      <td>{TYPE_LABELS[obj.type] || obj.type}</td>
+                      <td>{obj.launchDate ? formatRelativeTime(obj.launchDate) : '—'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <div className="info-sections">
           <section className="info-section" id="how-it-works">
+            <div className="info-eyebrow">Reference</div>
             <h2 className="info-heading">How search works</h2>
             <p className="info-body">
               Search matches against object name, NORAD catalog number, or COSPAR
@@ -318,6 +341,7 @@ export default function SearchPage() {
           </section>
 
           <section className="info-section" id="about">
+            <div className="info-eyebrow">Reference</div>
             <h2 className="info-heading">About Vitale</h2>
             <p className="info-body">
               Vitale continuously monitors orbital object history, including element set
@@ -333,6 +357,7 @@ export default function SearchPage() {
 
           <section className="info-section" id="feedback">
             <div className="feedback-card">
+              <div className="info-eyebrow">Reference</div>
               <h2 className="info-heading">Contact us</h2>
               <p className="info-body">
                 Report an issue, suggest an improvement, or request audit event
@@ -342,11 +367,17 @@ export default function SearchPage() {
             </div>
           </section>
         </div>
+
+        <div className="provenance">
+          <span>Source: Space-Track.org</span>
+          <span>Catalog synced ~daily</span>
+        </div>
       </div>
 
       <aside className="search-sidebar">
         <TopTracked limit={10} />
       </aside>
+      </div>
 
       {/* Always mounted so the open/close state can animate via the is-open
           class instead of popping in and out of the DOM instantly. */}

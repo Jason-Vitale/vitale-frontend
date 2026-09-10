@@ -101,6 +101,7 @@ function normalizeAuditEvent(raw) {
     severity: classifySeverity(raw.event_type_code),
     label: humanize(raw.event_type_code) || 'Event',
     detail: formatEventDetail(raw.detail_json),
+    code: raw.event_type_code || '',
   };
 }
 
