@@ -151,12 +151,12 @@
   color: var(--ink-muted);
 }
 
-/* Right-aligned via margin-left: auto rather than absolute centering, so
-   it reads as a registry label sitting at the header's edge next to the
-   action buttons instead of a centered tagline. */
+/* Sits directly after the brand on the left, with margin-right: auto
+   pushing the actions cluster to the far edge instead of the tagline
+   itself drifting toward it. */
 .site-header-tagline {
-  margin-left: auto;
-  margin-right: 20px;
+  margin-left: 14px;
+  margin-right: auto;
   font-family: var(--font-mono);
   font-size: 11px;
   font-weight: 500;
@@ -165,6 +165,39 @@
   color: var(--app-text-muted);
   white-space: nowrap;
   pointer-events: none;
+}
+
+/* Truly centered in the header (not just centered-in-the-gap), and
+   independent of .site-header-actions -- unlike About/Contact it never
+   collapses into the phone hamburger menu, so it reads the same on
+   every screen size. */
+.site-header-demo {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 16px;
+  border-radius: 2px;
+  border: 1px solid var(--ink-primary);
+  background: var(--ink-primary);
+  color: var(--on-dark);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+
+.site-header-demo:hover {
+  opacity: 0.85;
 }
 
 .site-header-about {
@@ -1056,6 +1089,722 @@
   color: var(--ink-faint);
 }
 
+/* ── Demo page ───────────────────────────────────────────────── */
+.demo-caption {
+  font-size: 12px;
+  color: var(--app-text-muted);
+  margin-top: 14px;
+  text-align: center;
+}
+
+.demo-frame {
+  border: 1px solid var(--ink-border);
+  border-radius: 6px;
+  overflow: hidden;
+  background: var(--app-bg);
+}
+
+.demo-frame-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--ink-border);
+}
+
+.demo-frame-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--hairline-strong);
+}
+
+.demo-frame-url {
+  margin-left: 8px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--app-text-muted);
+}
+
+.demo-screen {
+  background: var(--app-bg);
+}
+
+.demo-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Orbit + tracked objects */
+/* Camera group -- wraps the whole "monitor" and pans/zooms across it on a
+   16s loop like a real screen recording: zoom into the search box while
+   three objects are selected from the results, pull back wide as those
+   three lay out as columns, then stay wide while the cursor moves quickly
+   from column to column, expanding each one's audit history in turn.
+   Transforms are computed in plain SVG user units (view-box, not the
+   group's own fill-box), so the translate values line up with the
+   on-screen coordinates used throughout this file. */
+.demo-camera {
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+  animation: demo-camera-move 16s ease-in-out infinite;
+}
+
+.demo-label {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  fill: rgba(15, 27, 42, 0.45);
+}
+
+/* Search box -- type a query, the results appear, then one is clicked
+   open. Fades in as a whole and back out once the camera moves on to the
+   opened object, so it's ready to reuse next loop. */
+.demo-input {
+  fill: none;
+  stroke: var(--ink-border);
+  stroke-width: 1;
+}
+
+.demo-input-icon {
+  fill: none;
+  stroke: var(--ink-faint);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.demo-caret {
+  stroke: var(--ink-primary);
+  stroke-width: 1.5;
+  animation: demo-blink 1s step-end infinite;
+}
+
+.demo-typed-text {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  fill: var(--app-text);
+  opacity: 0;
+  animation: demo-typed-reveal 16s ease-in-out infinite;
+}
+
+.demo-result-name {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  font-weight: 600;
+  fill: var(--app-text);
+}
+
+.demo-result-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--app-text-muted);
+}
+
+.demo-search-act {
+  opacity: 0;
+  animation: demo-search-act 16s ease-in-out infinite;
+}
+
+.demo-result-row--1 { opacity: 0; animation: demo-row-1 16s ease-in-out infinite; }
+.demo-result-row--2 { opacity: 0; animation: demo-row-2 16s ease-in-out infinite; }
+.demo-result-row--3 { opacity: 0; animation: demo-row-3 16s ease-in-out infinite; }
+
+/* Flashes behind the first result right as it's clicked open. */
+.demo-select-highlight {
+  fill: rgba(15, 27, 42, 0.07);
+  stroke: rgba(15, 27, 42, 0.25);
+  stroke-width: 1;
+  opacity: 0;
+  animation: demo-select-flash 16s ease-in-out infinite;
+}
+
+/* Opened object -- header, metrics, and an audit record grouped into a
+   date timeline, same shape as the real object page: each date group
+   starts collapsed (a chevron + label + count) and expands in place to
+   reveal its events underneath, exactly like clicking one open in
+   production, rather than all the history dumping in at once. */
+.demo-detail-act {
+  opacity: 0;
+  animation: demo-detail-act 16s ease-in-out infinite;
+}
+
+.demo-detail-header {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  fill: var(--ink-primary);
+  opacity: 0;
+  animation: demo-detail-header 16s ease-in-out infinite;
+}
+
+.demo-detail-meta {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--app-text-muted);
+  opacity: 0;
+  animation: demo-detail-meta 16s ease-in-out infinite;
+}
+
+.demo-audit-header {
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  font-weight: 500;
+  fill: var(--ink-primary);
+  opacity: 0;
+  animation: demo-audit-header 16s ease-in-out infinite;
+}
+
+.demo-group-header {
+  opacity: 0;
+}
+
+.demo-group-header--1 { animation: demo-group-1 16s ease-in-out infinite; }
+.demo-group-header--2 { animation: demo-group-2 16s ease-in-out infinite; }
+
+.demo-group-label {
+  font-family: var(--font-sans);
+  font-size: 10px;
+  fill: var(--app-text);
+}
+
+.demo-group-count {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--app-text-muted);
+}
+
+.demo-chevron {
+  fill: var(--ink-primary);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.demo-chevron--1 { animation: demo-chevron-1 16s ease-in-out infinite; }
+.demo-chevron--2 { animation: demo-chevron-2 16s ease-in-out infinite; }
+
+/* The individual event rows under a date group -- revealed once the
+   cursor "clicks" that group's header open. */
+.demo-event-row {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: rgba(15, 27, 42, 0.7);
+  opacity: 0;
+}
+
+.demo-event-row--1 { animation: demo-events-1 16s ease-in-out infinite; }
+.demo-event-row--2 { animation: demo-events-2 16s ease-in-out infinite; }
+
+/* Cursor */
+.demo-cursor {
+  fill: var(--ink-primary);
+  stroke: var(--app-bg);
+  stroke-width: 0.75;
+  animation: demo-cursor-move 16s ease-in-out infinite;
+}
+
+@keyframes demo-blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Cursor rests over the results while they load, clicks the first one
+   open, then moves to each date group in turn to expand it. */
+@keyframes demo-cursor-move {
+  0%, 4% { transform: translate(120px, 38px); }
+  8%, 22% { transform: translate(100px, 66px); }
+  26%, 30% { transform: translate(100px, 66px); }
+  34%, 56% { transform: translate(30px, 228px); }
+  60%, 96% { transform: translate(30px, 282px); }
+  100% { transform: translate(120px, 38px); }
+}
+
+/* Whole-monitor camera storyboard, 16s loop:
+   0-4%    wide establishing shot
+   8-26%   zoomed on the search box: type a query, results appear, the
+           first one is clicked open
+   30-96%  zoomed on the opened object: header, metrics, and an audit
+           record grouped by date -- the cursor clicks each date group
+           open in turn to expand its events */
+@keyframes demo-camera-move {
+  0%, 4% { transform: translate(0, 0) scale(1); }
+  8%, 26% { transform: translate(91px, 32px) scale(1.8); }
+  30%, 96% { transform: translate(74px, -186px) scale(1.5); }
+  100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes demo-search-act {
+  0%, 2% { opacity: 0; }
+  4%, 28% { opacity: 1; }
+  30%, 100% { opacity: 0; }
+}
+
+@keyframes demo-typed-reveal {
+  0%, 7% { opacity: 0; }
+  9%, 100% { opacity: 1; }
+}
+
+@keyframes demo-row-1 {
+  0%, 10% { opacity: 0; }
+  12%, 100% { opacity: 1; }
+}
+
+@keyframes demo-row-2 {
+  0%, 14% { opacity: 0; }
+  16%, 100% { opacity: 1; }
+}
+
+@keyframes demo-row-3 {
+  0%, 18% { opacity: 0; }
+  20%, 100% { opacity: 1; }
+}
+
+@keyframes demo-select-flash {
+  0%, 21% { opacity: 0; }
+  23%, 26% { opacity: 1; }
+  28%, 100% { opacity: 0; }
+}
+
+@keyframes demo-detail-act {
+  0%, 29% { opacity: 0; }
+  32%, 97% { opacity: 1; }
+  99%, 100% { opacity: 0; }
+}
+
+@keyframes demo-detail-header {
+  0%, 33% { opacity: 0; }
+  35%, 100% { opacity: 1; }
+}
+
+@keyframes demo-detail-meta {
+  0%, 37% { opacity: 0; }
+  39%, 100% { opacity: 1; }
+}
+
+@keyframes demo-audit-header {
+  0%, 41% { opacity: 0; }
+  43%, 100% { opacity: 1; }
+}
+
+@keyframes demo-group-1 {
+  0%, 45% { opacity: 0; }
+  47%, 100% { opacity: 1; }
+}
+
+@keyframes demo-group-2 {
+  0%, 57% { opacity: 0; }
+  59%, 100% { opacity: 1; }
+}
+
+@keyframes demo-chevron-1 {
+  0%, 49% { transform: rotate(0deg); }
+  53%, 100% { transform: rotate(90deg); }
+}
+
+@keyframes demo-chevron-2 {
+  0%, 61% { transform: rotate(0deg); }
+  65%, 100% { transform: rotate(90deg); }
+}
+
+@keyframes demo-events-1 {
+  0%, 51% { opacity: 0; }
+  54%, 100% { opacity: 1; }
+}
+
+@keyframes demo-events-2 {
+  0%, 63% { opacity: 0; }
+  66%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .demo-caret,
+  .demo-cursor,
+  .demo-camera,
+  .demo-typed-text,
+  .demo-result-row--1,
+  .demo-result-row--2,
+  .demo-result-row--3,
+  .demo-select-highlight,
+  .demo-search-act,
+  .demo-detail-act,
+  .demo-detail-header,
+  .demo-detail-meta,
+  .demo-audit-header,
+  .demo-group-header--1,
+  .demo-group-header--2,
+  .demo-chevron--1,
+  .demo-chevron--2,
+  .demo-event-row--1,
+  .demo-event-row--2 {
+    animation: none;
+  }
+
+  /* Land on the wrap-up state instead of animating toward it: search
+     hidden, the opened object showing, both date groups expanded with
+     their events visible. */
+  .demo-detail-act,
+  .demo-detail-header,
+  .demo-detail-meta,
+  .demo-audit-header,
+  .demo-group-header--1,
+  .demo-group-header--2,
+  .demo-event-row--1,
+  .demo-event-row--2 {
+    opacity: 1;
+  }
+
+  .demo-chevron--1,
+  .demo-chevron--2 {
+    transform: rotate(90deg);
+  }
+}
+
+/* ── Demo page mode toggle ──────────────────────────────────────── */
+.demo-mode-toggle {
+  display: inline-flex;
+  gap: 4px;
+  padding: 4px;
+  border: 1px solid var(--ink-border);
+  border-radius: 4px;
+  background: var(--hover-tint);
+  margin-bottom: 20px;
+}
+
+.demo-mode-button {
+  padding: 9px 16px;
+  border: none;
+  border-radius: 2px;
+  background: transparent;
+  color: var(--app-text-secondary);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+}
+
+.demo-mode-button:hover {
+  color: var(--app-text);
+}
+
+.demo-mode-button.is-active {
+  background: var(--ink-primary);
+  color: var(--on-dark);
+}
+
+/* ── Organizations demo scene ───────────────────────────────────
+   A second, literal product-UI mockup (forms, dashboard cards, a
+   checklist) rather than the Education scene's illustrative orbit
+   graphic -- this persona cares about configuring the tool, not seeing
+   orbital mechanics. Runs its own 16s camera loop across three panels:
+   a custom rule builder, a fleet dashboard, and a compliance report
+   with its outbound connections. */
+.org-camera {
+  transform-box: view-box;
+  transform-origin: 0px 0px;
+  animation: org-camera-move 16s ease-in-out infinite;
+}
+
+.org-sub {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--app-text-muted);
+}
+
+.org-condition-label {
+  font-family: var(--font-sans);
+  font-size: 10.5px;
+  fill: var(--app-text);
+}
+
+.org-checkbox {
+  fill: none;
+  stroke: var(--ink-border);
+  stroke-width: 1.25;
+}
+
+.org-checkmark {
+  fill: none;
+  stroke: var(--ink-primary);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.org-connected-check {
+  opacity: 1;
+}
+
+.org-checkmark--1 { animation: org-check-1 16s ease-in-out infinite; }
+.org-checkmark--2 { animation: org-check-2 16s ease-in-out infinite; }
+
+.org-threshold-box {
+  fill: none;
+  stroke: var(--ink-border);
+  stroke-width: 1;
+}
+
+.org-threshold-value {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 500;
+  fill: var(--ink-primary);
+  opacity: 0;
+}
+
+.org-threshold-value--1 { animation: org-threshold-1 16s ease-in-out infinite; }
+.org-threshold-value--2 { animation: org-threshold-2 16s ease-in-out infinite; }
+
+/* AI hint -- an alternative to hand-building conditions/thresholds one at
+   a time: describe the rule in plain English and let AI draft it. */
+.org-ai-box {
+  fill: var(--hover-tint);
+  stroke: var(--ink-border);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+  opacity: 0;
+  animation: org-ai-reveal 16s ease-in-out infinite;
+}
+
+.org-ai-hint {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--app-text-secondary);
+  opacity: 0;
+  animation: org-ai-reveal 16s ease-in-out infinite;
+}
+
+.org-alert-via {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--app-text-secondary);
+  opacity: 0;
+  animation: org-alert-via 16s ease-in-out infinite;
+}
+
+.org-card {
+  fill: none;
+  stroke: var(--ink-border);
+  stroke-width: 1;
+}
+
+.org-card-value {
+  font-family: var(--font-mono);
+  font-size: 15px;
+  font-weight: 600;
+  fill: var(--ink-primary);
+}
+
+.org-card-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  fill: var(--app-text-muted);
+}
+
+.org-card--1 { opacity: 0; animation: org-card-1 16s ease-in-out infinite; }
+.org-card--2 { opacity: 0; animation: org-card-2 16s ease-in-out infinite; }
+.org-card--3 { opacity: 0; animation: org-card-3 16s ease-in-out infinite; }
+
+.org-feed-line {
+  font-family: var(--font-mono);
+  font-size: 9.5px;
+  fill: var(--app-text-secondary);
+  opacity: 0;
+}
+
+.org-feed-line--1 { animation: org-alert-1 16s ease-in-out infinite; }
+.org-feed-line--2 { animation: org-alert-2 16s ease-in-out infinite; }
+
+.org-report-line {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  fill: var(--app-text-secondary);
+  opacity: 0;
+}
+
+.org-report-line--1 { animation: org-report-1 16s ease-in-out infinite; }
+.org-report-line--2 { animation: org-report-2 16s ease-in-out infinite; }
+
+.org-connections {
+  opacity: 0;
+  animation: org-connected 16s ease-in-out infinite;
+}
+
+.org-connection-node {
+  fill: none;
+  stroke: var(--ink-border);
+  stroke-width: 1;
+}
+
+.org-connection-label {
+  font-family: var(--font-mono);
+  font-size: 8px;
+  fill: var(--app-text-muted);
+}
+
+.org-connection-line {
+  stroke: rgba(15, 27, 42, 0.22);
+  stroke-width: 1;
+  stroke-dasharray: 2 4;
+}
+
+.org-connected-label {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  fill: var(--ink-primary);
+}
+
+.org-report-ready {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  letter-spacing: 0.03em;
+  fill: var(--ink-primary);
+  opacity: 0;
+  animation: org-report-ready 16s ease-in-out infinite;
+}
+
+.org-cursor {
+  fill: var(--ink-primary);
+  stroke: var(--app-bg);
+  stroke-width: 0.75;
+  animation: org-cursor-move 16s ease-in-out infinite;
+}
+
+/* Whole-monitor camera storyboard, 16s loop:
+   0-2%    wide establishing shot
+   7-28%   zoomed on the rule builder while three conditions tick on
+   32-36%  wide
+   40-60%  zoomed on the fleet dashboard as its cards and alerts fill in
+   64-68%  wide
+   72-95%  zoomed on the compliance report + its outbound connections */
+/* Whole-monitor camera storyboard, 16s loop:
+   0-2%    wide establishing shot
+   7-38%   zoomed on the rule builder: two conditions tick on, two custom
+           numeric thresholds are set, the AI-hint box reveals, then an
+           alert channel
+   42-46%  wide
+   50-70%  zoomed on the fleet dashboard as its cards and alerts fill in
+   74-100% wide -- no zooming back in; the compliance report compiles and
+           its outbound connections light up at plain reading scale */
+@keyframes org-camera-move {
+  0%, 2% { transform: translate(0, 0) scale(1); }
+  7%, 38% { transform: translate(97px, -5px) scale(1.8); }
+  42%, 46% { transform: translate(0, 0) scale(1); }
+  50%, 70% { transform: translate(-416px, 4px) scale(1.6); }
+  74%, 100% { transform: translate(0, 0) scale(1); }
+}
+
+@keyframes org-cursor-move {
+  0%, 2% { transform: translate(120px, 38px); }
+  7%, 38% { transform: translate(140px, 100px); }
+  42%, 46% { transform: translate(140px, 100px); }
+  50%, 70% { transform: translate(460px, 110px); }
+  74%, 100% { transform: translate(300px, 280px); }
+}
+
+@keyframes org-check-1 {
+  0%, 9% { opacity: 0; }
+  11%, 100% { opacity: 1; }
+}
+
+@keyframes org-check-2 {
+  0%, 14% { opacity: 0; }
+  16%, 100% { opacity: 1; }
+}
+
+@keyframes org-threshold-1 {
+  0%, 19% { opacity: 0; }
+  21%, 100% { opacity: 1; }
+}
+
+@keyframes org-threshold-2 {
+  0%, 24% { opacity: 0; }
+  26%, 100% { opacity: 1; }
+}
+
+@keyframes org-ai-reveal {
+  0%, 29% { opacity: 0; }
+  31%, 100% { opacity: 1; }
+}
+
+@keyframes org-alert-via {
+  0%, 34% { opacity: 0; }
+  36%, 100% { opacity: 1; }
+}
+
+@keyframes org-card-1 {
+  0%, 51% { opacity: 0; }
+  53%, 100% { opacity: 1; }
+}
+
+@keyframes org-card-2 {
+  0%, 54% { opacity: 0; }
+  56%, 100% { opacity: 1; }
+}
+
+@keyframes org-card-3 {
+  0%, 57% { opacity: 0; }
+  59%, 100% { opacity: 1; }
+}
+
+@keyframes org-alert-1 {
+  0%, 60% { opacity: 0; }
+  62%, 100% { opacity: 1; }
+}
+
+@keyframes org-alert-2 {
+  0%, 63% { opacity: 0; }
+  65%, 100% { opacity: 1; }
+}
+
+@keyframes org-report-1 {
+  0%, 76% { opacity: 0; }
+  78%, 100% { opacity: 1; }
+}
+
+@keyframes org-report-2 {
+  0%, 79% { opacity: 0; }
+  81%, 100% { opacity: 1; }
+}
+
+@keyframes org-connected {
+  0%, 82% { opacity: 0; }
+  84%, 100% { opacity: 1; }
+}
+
+@keyframes org-report-ready {
+  0%, 86% { opacity: 0; }
+  88%, 100% { opacity: 1; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .org-cursor,
+  .org-camera,
+  .org-checkmark--1,
+  .org-checkmark--2,
+  .org-threshold-value--1,
+  .org-threshold-value--2,
+  .org-ai-box,
+  .org-ai-hint,
+  .org-alert-via,
+  .org-card--1,
+  .org-card--2,
+  .org-card--3,
+  .org-feed-line--1,
+  .org-feed-line--2,
+  .org-report-line--1,
+  .org-report-line--2,
+  .org-connections,
+  .org-report-ready {
+    animation: none;
+    opacity: 1;
+  }
+}
+
 /* ── Type icon + badge ───────────────────────────────────────── */
 .type-icon {
   display: flex;
@@ -1685,6 +2434,15 @@
   .site-header-brand {
     font-size: 1.3rem;
   }
+  .site-header-demo {
+    height: 26px;
+    padding: 0 10px;
+    font-size: 10px;
+    gap: 4px;
+  }
+  .site-header-demo span {
+    display: none;
+  }
   .search-page {
     padding: 1.5rem 0 3rem;
   }
@@ -1762,6 +2520,15 @@
   .back-to-top {
     right: 16px;
     bottom: 16px;
+  }
+  .demo-mode-toggle {
+    display: flex;
+    width: 100%;
+  }
+  .demo-mode-button {
+    flex: 1;
+    padding: 9px 8px;
+    font-size: 11px;
   }
 }
 

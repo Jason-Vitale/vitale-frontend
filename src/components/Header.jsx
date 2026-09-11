@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, PlayCircle, X } from 'lucide-react';
 import TopTracked from './TopTracked';
 import Wordmark from './Wordmark';
 
@@ -81,6 +81,11 @@ export default function Header() {
         </Link>
 
         <span className="site-header-tagline">Orbital Auditing Catalog</span>
+
+        <Link to="/demo" className="site-header-demo">
+          <PlayCircle size={14} strokeWidth={2} />
+          <span>Watch demo</span>
+        </Link>
 
         <div className="site-header-actions">
           <Link to="/rules" className="site-header-about">

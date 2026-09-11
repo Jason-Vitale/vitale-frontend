@@ -7,6 +7,7 @@ import SearchPage from './pages/SearchPage';
 import ObjectDetailPage from './pages/ObjectDetailPage';
 import ProgressPage from './pages/ProgressPage';
 import RulesPage from './pages/RulesPage';
+import DemoPage from './pages/DemoPage';
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
             <Route path="/objects/:noradId" element={<ObjectDetailPage />} />
             <Route path="/progress" element={<ProgressPage />} />
             <Route path="/rules" element={<RulesPage />} />
+            <Route path="/demo" element={<DemoPage />} />
           </Routes>
         </main>
         <Footer />
