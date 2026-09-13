@@ -2,9 +2,20 @@ import { useState } from 'react';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { formatTimestamp } from '../lib/format';
 
-function TimelineEventRow({ event }) {
+function TimelineEventRow({ event, onSelect }) {
   return (
-    <div className="audit-row">
+    <div
+      className="audit-row audit-row--clickable"
+      role="button"
+      tabIndex={0}
+      onClick={() => onSelect(event)}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          onSelect(event);
+        }
+      }}
+    >
       <div className="audit-row-time">{formatTimestamp(event.eventTime)}</div>
       <div className="audit-row-body">
         <div className="audit-row-label">{event.label}</div>
@@ -18,11 +29,11 @@ function TimelineEventRow({ event }) {
 // Renders one timeline bucket. A single-event bucket is just a plain row;
 // a multi-event bucket (a busy day, or a rolled-up week/month) renders as
 // a collapsed header the reader can expand to see the events inside.
-export default function TimelineGroup({ group }) {
+export default function TimelineGroup({ group, onSelect }) {
   const [expanded, setExpanded] = useState(false);
 
   if (!group.alwaysExpandable && group.events.length === 1) {
-    return <TimelineEventRow event={group.events[0]} />;
+    return <TimelineEventRow event={group.events[0]} onSelect={onSelect} />;
   }
 
   return (
@@ -46,8 +57,12 @@ export default function TimelineGroup({ group }) {
       {expanded && (
         <div className="audit-group-body">
           {group.children
-            ? group.children.map((child) => <TimelineGroup key={child.key} group={child} />)
-            : group.events.map((event) => <TimelineEventRow key={event.id} event={event} />)}
+            ? group.children.map((child) => (
+                <TimelineGroup key={child.key} group={child} onSelect={onSelect} />
+              ))
+            : group.events.map((event) => (
+                <TimelineEventRow key={event.id} event={event} onSelect={onSelect} />
+              ))}
         </div>
       )}
     </div>

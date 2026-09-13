@@ -4,6 +4,7 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import TypeIcon from '../components/TypeIcon';
 import Spinner from '../components/Spinner';
 import TimelineGroup from '../components/TimelineGroup';
+import SnapshotPanel from '../components/SnapshotPanel';
 import { getObject, getObjectAudit } from '../lib/api';
 import { formatDate, formatRelativeTime, groupTimelineEvents, TYPE_LABELS } from '../lib/format';
 
@@ -14,6 +15,7 @@ export default function ObjectDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [eventsError, setEventsError] = useState(null);
+  const [selectedEvent, setSelectedEvent] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -136,7 +138,7 @@ export default function ObjectDetailPage() {
           {!eventsError && events.length > 0 && (
             <div className="audit-list">
               {timelineGroups.map((group) => (
-                <TimelineGroup key={group.key} group={group} />
+                <TimelineGroup key={group.key} group={group} onSelect={setSelectedEvent} />
               ))}
             </div>
           )}
@@ -145,6 +147,12 @@ export default function ObjectDetailPage() {
             <span>Source: Space-Track.org</span>
             {latestEventTime && <span>Latest event: {formatRelativeTime(latestEventTime)}</span>}
           </div>
+
+          <SnapshotPanel
+            event={selectedEvent}
+            object={object}
+            onClose={() => setSelectedEvent(null)}
+          />
         </>
       )}
     </div>

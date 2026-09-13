@@ -142,6 +142,38 @@ export async function getObjectAudit(noradId) {
   return { events: (data.events || []).map(normalizeAuditEvent) };
 }
 
+// The GP (TLE-derived) orbital element set behind the audit rules in
+// RulesPage -- inclination, RAAN, eccentricity, semimajor axis, and BSTAR
+// are what those rules actually watch; the rest ride along in the same row.
+function normalizeSnapshot(raw) {
+  return {
+    epoch: raw.epoch,
+    fetchedAt: raw.fetched_at,
+    inclination: raw.inclination,
+    eccentricity: raw.eccentricity,
+    raanDeg: raw.ra_of_asc_node,
+    argOfPericenter: raw.arg_of_pericenter,
+    meanAnomaly: raw.mean_anomaly,
+    meanMotion: raw.mean_motion,
+    semimajorAxisKm: raw.semimajor_axis,
+    apoapsisKm: raw.apoapsis,
+    periapsisKm: raw.periapsis,
+    periodMin: raw.period,
+    bstar: raw.bstar,
+    revAtEpoch: raw.rev_at_epoch,
+    tleLine1: raw.tle_line1 || '',
+    tleLine2: raw.tle_line2 || '',
+  };
+}
+
+export async function getObjectSnapshot(noradId) {
+  const res = await safeFetch(`${API_BASE}/objects/${noradId}/snapshot`);
+  const data = await parseJsonResponse(res, {
+    notFoundMessage: `No orbital snapshot on record for object ${noradId}.`,
+  });
+  return normalizeSnapshot(data);
+}
+
 export async function getTopTracked(n = 10) {
   const params = new URLSearchParams({ limit: n });
   const res = await safeFetch(`${API_BASE}/objects/popular?${params}`);
